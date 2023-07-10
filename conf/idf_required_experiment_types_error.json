@@ -1,0 +1,13 @@
+{	
+	"LC-MS": ["liquid chromatography-mass spectrometry"],
+	"LC-DAD-MS": ["liquid chromatography-mass spectrometry"],
+	"GC-MS": ["gas chromatography-mass spectrometry"],
+	"GCGC-MS": ["gas chromatography-mass spectrometry", "two-dimensional gas chromatography"],
+	"GC-FID-MS": ["gas chromatography-mass spectrometry"],
+	"CE-MS": ["capillary electrophoresis-mass spectrometry"],
+	"DI-MS": ["direct infusion-mass spectrometry"],
+	"FIA-MS": ["flow injection analysis-mass spectrometry"],
+	"MALDI-MS": ["matrix-assisted laser desorption-ionisation mass spectrometry"],
+	"MSI": ["mass spectrometry imaging"],
+	"NMR": ["nuclear magnetic resonance spectroscopy"]
+}

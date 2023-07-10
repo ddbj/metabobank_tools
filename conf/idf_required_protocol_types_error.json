@@ -1,0 +1,13 @@
+{	
+	"LC-MS": ["Sample collection", "Extraction", "Chromatography", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"LC-DAD-MS": ["Sample collection", "Extraction", "Chromatography", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"GC-MS": ["Sample collection", "Extraction", "Chromatography", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"GCGC-MS": ["Sample collection", "Extraction", "Chromatography", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"GC-FID-MS": ["Sample collection", "Extraction", "Chromatography", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"CE-MS": ["Sample collection", "Extraction", "Capillary Electrophoresis", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"DI-MS": ["Sample collection", "Extraction", "Direct infusion", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"FIA-MS": ["Sample collection", "Extraction", "Flow injection analysis", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"MALDI-MS": ["Sample collection", "Extraction", "Mass spectrometry", "Data processing", "Metabolite identification"],
+	"MSI": ["Sample collection", "Preparation", "Mass spectrometry", "Histology", "Data processing", "Metabolite identification"],
+	"NMR": ["Sample collection", "Extraction", "NMR sample", "NMR spectroscopy", "NMR assay", "Data processing", "Metabolite identification"]
+}
