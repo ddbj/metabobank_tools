@@ -1,0 +1,18 @@
+[
+	"Source Name",
+	"Sample Name",
+	"Extract Name",
+	"Labeled Extract Name",
+	"Assay Name",
+	"Raw Data File",
+	"Image Data File",
+	"Processed Data File",
+	"Metabolite Assignment File",
+	"Label",
+	"Protocol REF",
+	"Characteristics\\[.*\\]",
+	"Parameter Value\\[.*\\]",
+	"Comment\\[.*\\]",
+	"Unit\\[.*\\]",
+	"Factor Value\\[.*\\]"
+]

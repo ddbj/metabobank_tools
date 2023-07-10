@@ -1,0 +1,7 @@
+{
+	"Experimental Factor": ["Experimental Factor Name","Experimental Factor Type"],
+	"Person": ["Person Last Name","Person First Name","Person Affiliation","Person Roles"],
+	"Publication": ["Publication Title","Publication Author List","Publication Status"],
+	"Protocol": ["Protocol Name","Protocol Type","Protocol Description"],
+	"Term Source": ["Term Source Name","Term Source File","Term Source Version"]
+}

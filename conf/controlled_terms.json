@@ -1,0 +1,17 @@
+{
+  "idf": {
+    "error": {
+      "MAGE-TAB Version": ["1.1"],
+      "Comment[Study type]": ["targeted metabolite profiling", "untargeted metabolite profiling", "metabolic fingerprinting", "metabolite target analysis", "metabolite profiling", "metabolomics", "metabolic profiling", "metabonomics", "lipid profiling", "biomarker", "volatile organic compound", "method development", "microbiome", "cancer", "reference compound", "blood metabolite profiling", "secondary metabolite profiling", "COVID-19", "drug metabolism", "MicroRNA profiling", "chemical library", "amino acids", "organic acids"],
+      "Experimental Design": ["case control design", "cell component comparison design", "cell cycle design", "cell type comparison design", "cellular modification design", "clinical history design", "compound treatment design", "cross sectional design", "development or differentiation design", "disease state design", "dose response design", "family based design", "twin design", "genetic modification design", "genotype design", "growth condition design", "imprinting design", "injury design", "innate behavior design", "observational design", "organism part comparison design", "organism status design", "pathogenicity design", "population based design", "sex design", "species design", "stimulus or stress design", "strain or line design", "time series design", "hardware variation design", "normalization testing design", "operator variation design", "optimization design", "quality control testing design", "reference design", "replicate design", "software variation design"],
+      "Comment[Experiment type]": ["capillary electrophoresis-mass spectrometry", "data-dependent acquisition", "data-independent acquisition", "direct infusion-mass spectrometry", "flow injection analysis-mass spectrometry", "fourier transform ion cyclotron resonance mass spectrometry", "gas chromatography-mass spectrometry", "ion mobility spectrometry-mass spectrometry", "ion trap mass spectrometry", "isotope ratio mass spectrometry", "laser mass spectrometry", "liquid chromatography-mass spectrometry", "mass spectrometry imaging", "matrix-assisted laser desorption-ionisation imaging mass spectrometry", "matrix-assisted laser desorption-ionisation time-of-flight mass spectrometry", "orbitrap", "quadrupole mass spectrometer", "selected reaction monitoring", "selective ion monitoring", "SWATH MS", "tandem mass spectrometry", "time-of-flight mass spectrometry", "two-dimensional gas chromatography", "high-resolution mass spectrometry", "ultra-performance liquid chromatography-mass spectrometry", "13C nuclear magnetic resonance spectroscopy", "1H nuclear magnetic resonance spectroscopy", "four-dimensional nuclear magnetic resonance spectroscopy", "nuclear magnetic resonance spectroscopy", "one-dimensional nuclear magnetic resonance spectroscopy", "three-dimensional nuclear magnetic resonance spectroscopy", "two-dimensional nuclear magnetic resonance spectroscopy"],
+      "Comment[Submission type]": ["LC-MS", "LC-DAD-MS", "GC-MS", "GCGC-MS", "GC-FID-MS", "CE-MS", "DI-MS", "FIA-MS", "MALDI-MS", "MSI", "NMR"],
+      "Person Roles": ["submitter"]
+    },
+    "warning": {
+      "Protocol Type": ["Sample collection", "Extraction", "Chromatography", "Mass spectrometry", "Data processing", "Metabolite identification", "Capillary Electrophoresis", "Direct infusion", "Flow injection analysis", "Preparation", "Histology", "NMR sample", "NMR spectroscopy", "NMR assay"]
+    }
+  },
+  "sdrf": {
+  }
+}

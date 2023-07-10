@@ -1,0 +1,4 @@
+{
+	"Characteristics[biosample_accession]" : "SAMD\\d{8}",
+	"Comment[Reanalysis of]" : "MTBKS\\d{1,}:[^:]+"
+}

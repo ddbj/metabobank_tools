@@ -1,0 +1,157 @@
+#! /usr/bin/ruby
+# -*- coding: utf-8 -*-
+
+require 'rubygems'
+require 'pp'
+require 'csv'
+require 'fileutils'
+require 'optparse'
+require 'json'
+require 'time'
+require './lib/mb-method.rb'
+#require '/usr/local/bin/lib/mb-method.rb'
+
+#
+# 生命情報・DDBJ センター
+# 2022-08-31 児玉
+# MetaboBank accession numbers notification mail
+#
+
+###
+### 設定
+###
+conf_path = "conf"
+#conf_path = "/usr/local/bin/conf"
+
+###
+### 入力
+###
+
+## Options
+idf_path = ""
+jira_issue = ""
+OptionParser.new{|opt|
+
+	opt.on('-i [IDF file]', 'IDF file path'){|v|
+		raise "usage: -i IDF file (MTBKS1.idf.txt)" if v.nil?
+		idf_path = v		
+	}
+
+	opt.on('-j [Jira issue ID]', 'Jira issue ID (e.g., MBS-7)'){|v|
+		raise "usage: -j Jira issue ID (MBS-7)" if v !~ /MBS-\d{1,}/
+		jira_issue = v
+	}
+
+	begin
+
+		opt.parse!
+
+	rescue
+
+		puts "Invalid option. #{opt}"
+
+	end
+
+}
+
+## 設定出力
+puts "IDF: #{idf_path}"
+puts "Jira issue ID: #{jira_issue}" if jira_issue != ""
+
+## ファイル名
+idf_file = File.basename(idf_path)
+
+###
+### parse
+###
+
+## IDF parse
+mtbks_idf, idf_h, idf_a, idf_group_h, raw_idf_a, warning_idf_parse = idf_parse(idf_path)
+
+hold = "Hold (not viewable until the release of linked data)"
+if idf_h["Public Release Date"] && idf_h["Public Release Date"][0] && idf_h["Public Release Date"][0] != ""
+	hold = "Release immediately following data processing"
+end
+
+###
+### アクセッション番号通知メール
+###
+
+## Person
+dear_a = []
+mail_a = []
+affiliation = ""
+first = true
+study_title = ""
+study_title = idf_h["Study Title"][0] if idf_h["Study Title"] && idf_h["Study Title"][0]
+for person_h in idf_group_h["Person"]
+
+	dear_a.push("#{person_h["Person First Name"]} #{person_h["Person Last Name"]}")
+	mail_a.push("#{person_h["Person Email"]}")
+	
+	# 最初の組織名を使用
+	if first
+		affiliation = person_h["Person Affiliation"]
+		first = false
+	end
+	
+end
+
+# メールの宛名
+dear = ""
+dear = dear_a.join(", ")
+dear[dear.rindex(",")] = " and" if dear.rindex(",")
+
+to = ""
+to = mail_a.join(",")
+
+cc = "metabobank@ddbj.nig.ac.jp"
+
+if jira_issue == ""
+	subject = "[MetaboBank] MetaboBank Assigned Accession No."
+else
+	subject = "[MetaboBank:#{jira_issue}] MetaboBank Assigned Accession No."
+end
+
+body = ""
+
+puts ""
+
+puts <<EOF
+to: #{to}
+cc: #{cc}
+
+subject:
+#{subject}
+
+Dear #{dear},
+
+This is an automatic acknowledgment that your recent submission to the MetaboBank database has been successfully processed and will be released as you specified.
+
+MetaboBank accession: #{mtbks_idf}
+Release: #{hold}
+Study Title: #{study_title}
+
+# Citation of accession number
+Please cite the MetaboBank study accession number with the prefix MTBKS.
+
+# Data release
+The metadata and data files will be available at our ftp site after the data release.
+https://ddbj.nig.ac.jp/public/metabobank/study/
+
+The metadata will be indexed in the MetaboBank search in several working days after the data release.
+https://mb2.ddbj.nig.ac.jp/search/
+
+# Update
+Contact us to update the records.
+
+Send questions and update requests to metabobank@ddbj.nig.ac.jp; include the MetaboBank accession in any correspondence.
+
+Regards,
+
+DDBJ MetaboBank Submission Staff
+Mishima, Shizuoka, Japan
+************************************
+E-mail: metabobank@ddbj.nig.ac.jp
+************************************
+EOF
