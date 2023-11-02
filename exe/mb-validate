@@ -23,101 +23,77 @@ conf_path = File.expand_path('../conf', __dir__)
 ### 入力
 ###
 ## Options
-idf_path = ""
-sdrf_path = ""
-bs_path = ""
-md_path = ""
-corrected_dir = ""
+idf_path = nil
+sdrf_path = nil
+bs_path = nil
+md_path = nil
+corrected_dir = nil
 data_file_validation_flag = false
 auto_correction_flag = false
-OptionParser.new{|opt|
+machine_readable = false
+opt = OptionParser.new{|opt|
 
-  opt.on('-i [IDF file]', 'IDF file path'){|v|
-    raise "usage: -i IDF file (MTBKS1.idf.txt)" if v.nil?
+  opt.on('-i PATH', 'IDF file path'){|v|
     idf_path = v
-    puts "IDF: #{v}"
   }
 
-  opt.on('-s [SDRF file]', 'SDRF file path'){|v|
-
-    if v == ""
-      sdrf_path = idf_path.sub(".idf.txt", ".sdrf.txt")
-    else
-      sdrf_path = v
-    end
-
-    puts "SDRF: #{v}"
+  opt.on('-s PATH', 'SDRF file path'){|v|
+    sdrf_path = v
   }
 
-  opt.on('-t [BioSample tsv file]', 'BioSample tsv'){|v|
-
-    if v != ""
-      bs_path = v
-      puts "BioSample tsv: #{v}"
-    end
-
+  opt.on('-t PATH', 'BioSample tsv path'){|v|
+    bs_path = v
   }
 
-  opt.on('-m [md5 checksum file]', 'md5sum file'){|v|
-
-    if v != ""
-      md_path = v
-      puts "md5 checksum file: #{v}"
-    end
-
+  opt.on('-m PATH', 'md5sum file path'){|v|
+    md_path = v
   }
 
-  opt.on('-d', 'Check data files'){|v|
-
+  opt.on('-d', 'Check data files'){
     data_file_validation_flag = true
-
   }
 
-  opt.on('-a', 'Auto-correction'){|v|
-
+  opt.on('-a', 'Auto-correction'){
     auto_correction_flag = true
-
   }
 
-  opt.on('-o [output corrected file]', 'output directory of corrected files'){|v|
-
-    if v == ""
-      corrected_dir = File.dirname(idf_path)
-    else
-      corrected_dir = v
-    end
-
+  opt.on('-o PATH', 'output directory of corrected files'){|v|
+    corrected_dir = v
   }
 
-  begin
-
-    opt.parse!
-
-    if sdrf_path.empty?
-      sdrf_path = idf_path.sub(".idf.txt", ".sdrf.txt")
-      puts "SDRF: #{sdrf_path}"
-    end
-
-    if corrected_dir.empty?
-      corrected_dir = File.dirname(idf_path)
-      puts "Auto-corrected files will be generated at #{corrected_dir}" if auto_correction_flag
-    else
-      puts "Auto-corrected files will be generated at #{corrected_dir}" if auto_correction_flag
-    end
-
-  rescue
-
-    puts "Invalid option. #{opt}"
-
-  end
-
+  opt.on('--machine-readable'){
+    machine_readable = true
+  }
 }
+
+begin
+  opt.parse!
+rescue OptionParser::MissingArgument, OptionParser::InvalidArgument
+  warn opt.to_s
+  exit 1
+end
+
+unless idf_path
+  warn opt.to_s
+  exit 1
+end
+
+sdrf_path ||= idf_path.sub(".idf.txt", ".sdrf.txt")
+corrected_dir ||= File.dirname(idf_path)
+
+unless machine_readable
+  puts "IDF: #{idf_path}"
+  puts "SDRF: #{sdrf_path}"
+  puts "BioSample tsv: #{bs_path}"
+  puts "md5 checksum file: #{md_path}"
+  puts "Auto-corrected files will be generated at #{corrected_dir}" if auto_correction_flag
+end
 
 # data file validation on/off
 if data_file_validation_flag
-  puts "Validate data files."
+  puts "Validate data files." unless machine_readable
 else
-  puts "No data file validation."
+  puts "No data file validation." unless machine_readable
 end
 
 ## ファイル名
@@ -125,6 +101,8 @@ idf_file = File.basename(idf_path)
 sdrf_file = File.basename(sdrf_path)
 
 idf_dir = File.dirname(idf_path)
+
+errors = []
 
 ###
 ### parse
@@ -137,16 +115,14 @@ mtbks_idf, idf_h, idf_a, idf_group_h, raw_idf_a, warning_idf_parse = idf_parse(i
 mtbks_sdrf, sdrf_a, sdrf_transpose_h, sdrf_bs_h, warning_sdrf_parse = sdrf_parse(sdrf_path)
 
 ## BioSample parse
-if bs_path != ""
-  bs_h = bs_parse(bs_path)
-end
+bs_h = bs_parse(bs_path) if bs_path
 
 ##
 ## md5 checksum file
 ##
 md_h = {}
 different_md_file_a = []
-if md_path != ""
+if md_path
 
   md_f = open(md_path)
   for line in md_f.readlines
@@ -641,13 +617,24 @@ end
 #
 # IDF validation 結果出力
 #
-puts ""
-puts "IDF validation results"
-puts "---------------------------------------------"
-warning_idf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-error_ignore_idf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-error_idf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-puts "---------------------------------------------"
+if machine_readable
+  errors.concat (warning_idf_a + error_ignore_idf_a + error_idf_a).map {|(code, severity, message)|
+    {
+      object_id: 'IDF',
+      code:,
+      severity:,
+      message:
+    }
+  }
+else
+  puts ""
+  puts "IDF validation results"
+  puts "---------------------------------------------"
+  warning_idf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  error_ignore_idf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  error_idf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  puts "---------------------------------------------"
+end
 
 
 ##
@@ -850,94 +837,91 @@ if characteristics_a.size < 2
 end
 
 
-if bs_path != ""
+if bs_path
+  ###
+  ### BioSample attributes and SDRF Characteristics check
+  ###
 
-###
-### BioSample attributes and SDRF Characteristics check
-###
+  warning_sdrf_bs_a = []
+  error_ignore_sdrf_bs_a = []
+  bs_not_found_a = []
 
-warning_sdrf_bs_a = []
-error_ignore_sdrf_bs_a = []
-bs_not_found_a = []
+  ## BioSample との一致チェック
+  diff_attr_h = {}
+  missing_in_sdrf_h = {}
+  missing_in_bs_h = {}
+  for biosample_accession, sdrf_sample_h in sdrf_bs_h
 
-## BioSample との一致チェック
-diff_attr_h = {}
-missing_in_sdrf_h = {}
-missing_in_bs_h = {}
-for biosample_accession, sdrf_sample_h in sdrf_bs_h
+    if bs_h[biosample_accession]
 
-  if bs_h[biosample_accession]
+      diff_attr_a = []
+      missing_in_sdrf_a = []
+      missing_in_bs_a = []
+      sdrf_sample_h.each{|key, value|
 
-    diff_attr_a = []
-    missing_in_sdrf_a = []
-    missing_in_bs_a = []
-    sdrf_sample_h.each{|key, value|
+        if bs_h[biosample_accession][key]
 
-      if bs_h[biosample_accession][key]
+          if value != bs_h[biosample_accession][key]
+            diff_attr_a.push(key)
+          end
 
-        if value != bs_h[biosample_accession][key]
-          diff_attr_a.push(key)
+        # BioSample に属性がない
+        else
+          missing_in_bs_a.push(key) if value != ""
         end
 
-      # BioSample に属性がない
-      else
-        missing_in_bs_a.push(key) if value != ""
+      }
+
+      diff_attr_h.store(biosample_accession, diff_attr_a) unless diff_attr_a.empty?
+      missing_in_bs_h.store(biosample_accession, missing_in_bs_a) unless missing_in_bs_a.empty?
+
+      bs_h[biosample_accession].each{|bskey, bsvalue|
+        if bsvalue != "" && !sdrf_sample_h.keys.include?(bskey) && !["biosample_accession", "bioproject_id", "sample_name"].include?(bskey)
+          missing_in_sdrf_a.push(key)
+        end
+      }
+
+      if missing_in_sdrf_a.size > 0
+        missing_in_sdrf_h.store(biosample_accession, missing_in_sdrf_a) unless missing_in_sdrf_a.empty?
       end
 
-    }
-
-    diff_attr_h.store(biosample_accession, diff_attr_a) unless diff_attr_a.empty?
-    missing_in_bs_h.store(biosample_accession, missing_in_bs_a) unless missing_in_bs_a.empty?
-
-    bs_h[biosample_accession].each{|bskey, bsvalue|
-      if bsvalue != "" && !sdrf_sample_h.keys.include?(bskey) && !["biosample_accession", "bioproject_id", "sample_name"].include?(bskey)
-        missing_in_sdrf_a.push(key)
-      end
-    }
-
-    if missing_in_sdrf_a.size > 0
-      missing_in_sdrf_h.store(biosample_accession, missing_in_sdrf_a) unless missing_in_sdrf_a.empty?
+    else # if bs_h[biosample_accession]
+      bs_not_found_a.push(biosample_accession)
     end
 
-  else # if bs_h[biosample_accession]
-    bs_not_found_a.push(biosample_accession)
   end
 
-end
-
-if bs_not_found_a.size > 0
-  warning_sdrf_bs_a.push(["MB_SR0000", "warning", "BioSample accession not found in tsv: #{sdrf_file} #{bs_not_found_a.sort.uniq.join(",")}"])
-end
-
-
-### MB_SR0021 warning Missing biosample attribute
-if missing_in_sdrf_h.size > 0
-
-  for biosample_accession, missing_in_sdrf_a in missing_in_sdrf_h
-    warning_sdrf_bs_a.push(["MB_SR0021", "warning", "Missing biosample attribute: #{sdrf_file} #{biosample_accession}:#{missing_in_sdrf_a.join(",")}"])
+  if bs_not_found_a.size > 0
+    warning_sdrf_bs_a.push(["MB_SR0000", "warning", "BioSample accession not found in tsv: #{sdrf_file} #{bs_not_found_a.sort.uniq.join(",")}"])
   end
 
-end
 
-### MB_SR0022 warning No Biosample attribute
-if missing_in_bs_h.size > 0
+  ### MB_SR0021 warning Missing biosample attribute
+  if missing_in_sdrf_h.size > 0
 
-  for biosample_accession, missing_in_bs_a in missing_in_bs_h
-    warning_sdrf_bs_a.push(["MB_SR0022", "warning", "SDRF characteristics are not in BioSample attributes: #{sdrf_file} #{biosample_accession}:#{missing_in_bs_a.join(",")}"])
+    for biosample_accession, missing_in_sdrf_a in missing_in_sdrf_h
+      warning_sdrf_bs_a.push(["MB_SR0021", "warning", "Missing biosample attribute: #{sdrf_file} #{biosample_accession}:#{missing_in_sdrf_a.join(",")}"])
+    end
+
   end
 
-end
+  ### MB_SR0022 warning No Biosample attribute
+  if missing_in_bs_h.size > 0
 
-### MB_SR0023 error ignore Characteristics and BioSample attributes unmatch
-if diff_attr_h.size > 0
+    for biosample_accession, missing_in_bs_a in missing_in_bs_h
+      warning_sdrf_bs_a.push(["MB_SR0022", "warning", "SDRF characteristics are not in BioSample attributes: #{sdrf_file} #{biosample_accession}:#{missing_in_bs_a.join(",")}"])
+    end
 
-  for biosample_accession, diff_attr_a in diff_attr_h
-    error_ignore_sdrf_bs_a.push(["MB_SR0023", "error_ignore", "SDRF characteristics and BioSample attributes are different: #{sdrf_file} #{biosample_accession}:#{diff_attr_a.join(",")}"])
   end
 
-end
+  ### MB_SR0023 error ignore Characteristics and BioSample attributes unmatch
+  if diff_attr_h.size > 0
 
-end # if bs_path != ""
+    for biosample_accession, diff_attr_a in diff_attr_h
+      error_ignore_sdrf_bs_a.push(["MB_SR0023", "error_ignore", "SDRF characteristics and BioSample attributes are different: #{sdrf_file} #{biosample_accession}:#{diff_attr_a.join(",")}"])
+    end
+  end
+end
 
 
 ### MB_SR0019 error ignore Invalid value format
@@ -1437,13 +1421,24 @@ end # if data_file_validation_flag
 #
 # SDRF validation 結果出力
 #
-puts ""
-puts "SDRF validation results"
-puts "---------------------------------------------"
-warning_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-error_ignore_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-error_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-puts "---------------------------------------------"
+if machine_readable
+  errors.concat (warning_sdrf_a + error_ignore_sdrf_a + error_sdrf_a).map {|(code, severity, message)|
+    {
+      object_id: 'SDRF',
+      code:,
+      severity:,
+      message:
+    }
+  }
+else
+  puts ""
+  puts "SDRF validation results"
+  puts "---------------------------------------------"
+  warning_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  error_ignore_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  error_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  puts "---------------------------------------------"
+end
 
 ## IDF and SDRF
 # rules
@@ -1578,13 +1573,24 @@ end
 #
 # IDF & SDRF validation 結果出力
 #
-puts ""
-puts "IDF and SDRF validation results"
-puts "---------------------------------------------"
-warning_idf_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-error_ignore_idf_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-error_idf_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-puts "---------------------------------------------"
+if machine_readable
+  errors.concat (warning_idf_sdrf_a + error_ignore_idf_sdrf_a + error_idf_sdrf_a).map {|(code, severity, message)|
+    {
+      object_id: 'IDF and SDRF',
+      code:,
+      severity:,
+      message:
+    }
+  }
+else
+  puts ""
+  puts "IDF and SDRF validation results"
+  puts "---------------------------------------------"
+  warning_idf_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  error_ignore_idf_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  error_idf_sdrf_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+  puts "---------------------------------------------"
+end
 
 
 #
@@ -1663,11 +1669,24 @@ end
 #
 # SDRF & BioSample validation 結果出力
 #
-if bs_path != ""
-  puts ""
-  puts "SDRF and BioSample validation results"
-  puts "---------------------------------------------"
-  error_ignore_sdrf_bs_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-  warning_sdrf_bs_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
-  puts "---------------------------------------------"
+if bs_path
+  if machine_readable
+    errors.concat (error_ignore_sdrf_bs_a + warning_sdrf_bs_a).map {|(code, severity, message)|
+      {
+        object_id: 'SDRF and BioSample',
+        code:,
+        severity:,
+        message:
+      }
+    }
+  else
+    puts ""
+    puts "SDRF and BioSample validation results"
+    puts "---------------------------------------------"
+    error_ignore_sdrf_bs_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+    warning_sdrf_bs_a.sort{|a,b| a[0] <=> b[0]}.each{|m| puts m.join(": ")}
+    puts "---------------------------------------------"
+  end
 end
+
+puts JSON.pretty_generate(errors) if machine_readable
