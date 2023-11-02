@@ -1,14 +1,12 @@
-#! /usr/bin/ruby
+#! /usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-require 'rubygems'
 require 'pp'
 require 'csv'
 require 'fileutils'
 require 'optparse'
 require 'json'
-require './lib/mb-method.rb'
-#require '/usr/local/bin/lib/mb-method.rb'
+require 'metabobank_tools/mb-method'
 
 #
 # 生命情報・DDBJ センター
