@@ -17,8 +17,7 @@ require 'metabobank_tools/mb-method'
 ###
 ### 設定
 ###
-conf_path = "conf"
-#conf_path = "/usr/local/bin/conf"
+conf_path = File.expand_path('../conf', __dir__)
 
 ###
 ### 入力
