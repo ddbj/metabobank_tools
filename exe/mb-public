@@ -1,0 +1,268 @@
+#! /usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+require 'pp'
+require 'csv'
+require 'fileutils'
+require 'optparse'
+require 'json'
+require 'time'
+require 'metabobank_tools/mb-method'
+
+#
+# 生命情報・DDBJ センター
+# 2022-06-29 児玉
+# Release a MetaboBank study
+#
+
+###
+### 設定
+###
+conf_path = File.expand_path('../conf', __dir__)
+
+###
+### 入力
+###
+
+## Options
+idf_path = nil
+release_type = nil
+initial_release_date = nil
+last_update_date = Date.today.strftime("%Y-%m-%d")
+public_file_path = nil
+opt = OptionParser.new{|opt|
+
+  opt.on('-i IDF', 'IDF file path'){|v|
+    idf_path = v
+  }
+
+  opt.on('-r <ini|re>', 'initial or re-distribution', /\Aini\z|\Are\z/){|v|
+    release_type = v
+  }
+
+  # 過去に遡ったデータ公開の場合
+  opt.on('-d DATE', 'initial release date', /20\d{2}-\d{2}-\d{2}/){|v|
+    initial_release_date = v
+  }
+
+  # 過去に遡ったデータ公開の場合
+  opt.on('-u DATE', "last update date (default: #{last_update_date})", /20\d{2}-\d{2}-\d{2}/){|v|
+    last_update_date = v
+  }
+
+  opt.on('-p PATH', 'public file path'){|v|
+    public_file_path = v
+  }
+}
+
+begin
+  opt.parse!
+rescue OptionParser::MissingArgument, OptionParser::InvalidArgument
+  warn opt.to_s
+  exit 1
+end
+
+if idf_path.nil? || release_type.nil? || initial_release_date.nil? || public_file_path.nil?
+  warn opt.to_s
+  exit 1
+end
+
+## ファイル名と SDRF filepath
+idf_file = File.basename(idf_path)
+sdrf_path = idf_path.sub(".idf.txt", ".sdrf.txt")
+
+###
+### parse
+###
+
+## IDF parse
+mtbks_idf, idf_h, idf_a, idf_group_h, raw_idf_a, warning_idf_parse = idf_parse(idf_path)
+
+## SDRF parse
+mtbks_sdrf, sdrf_a, sdrf_transpose_h, sdrf_bs_h, warning_sdrf_parse = sdrf_parse(sdrf_path)
+
+# public release date
+public_release_date = ""
+if idf_h["Public Release Date"] && idf_h["Public Release Date"][0] && idf_h["Public Release Date"][0] =~ /20\d{2}-\d{2}-\d{2}/
+  public_release_date = idf_h["Public Release Date"][0]
+end
+
+# 初回公開で公開日未指定の場合、今日の日付を使用。
+initial_release_date = Date.today.strftime("%Y-%m-%d") if release_type == "ini" && initial_release_date == ""
+
+## 整合性チェック
+unless mtbks_idf =~ /MTBKS\d{1,}/
+  raise "Study accession is missing in IDF. #{idf_path}"
+end
+
+# 初回公開
+if release_type == "ini" && public_release_date != "" && initial_release_date != ""
+  raise "IDF Public Release Date and specified initial release date are different. #{idf_path} IDF Public Release Date: #{public_release_date}, Initial Release Date: #{initial_release_date}" if public_release_date != initial_release_date
+end
+
+# 再公開
+if release_type == "re"
+  raise "IDF Public Release Date is empty for re-distribution. #{idf_path}" if public_release_date == ""
+  raise "Initial release date is specified for re-distribution. #{idf_path}" if initial_release_date != ""
+end
+
+## auto-fill
+idf_corrected_h = {}
+
+# Public Release Date
+if release_type == "ini"
+  idf_corrected_h.store("Public Release Date", [initial_release_date])
+end
+
+# Last Update Date
+idf_corrected_h.store("Comment[Last Update Date]", [last_update_date])
+
+idf_updated_file_path = "#{idf_path.sub(".idf.txt", ".updated.idf.txt")}"
+idf_updated_file = open(idf_updated_file_path, "w")
+idf_dir = File.dirname(idf_path)
+
+# IDF blank line before
+blank_line_before_a = []
+open("#{conf_path}/idf_blank_before.json"){|f|
+  blank_line_before_a = JSON.load(f)
+}
+
+# Public Release Date と last update date を更新した IDF を作成。既存を mv で上書き。reviewer access は flag 変更なので日付は変更しない。
+for line_a in idf_a
+
+  field_name = line_a[0]
+  field_value_a = line_a[1..-1]
+
+  # 空行挿入
+  idf_updated_file.puts "" if blank_line_before_a.include?(field_name)
+
+  # auto-correction
+  if idf_corrected_h[field_name]
+    idf_updated_file.puts "#{field_name}\t#{idf_corrected_h[field_name].collect{|e| e.match(/\n|\t/) ? '"' + e + '"' : e }.join("\t")}"
+  else
+    idf_updated_file.puts line_a.collect{|e| e.match(/\n|\t/) ? '"' + e + '"' : e }.join("\t")
+  end
+
+end
+
+`mv #{idf_updated_file_path} #{idf_path}`
+idf_updated_file.close
+
+# 最終更新日を touch 形式に変換
+last_update_date_touch = Time.parse(last_update_date).strftime("%Y/%-m/%-d 12:00")
+
+## 対話モードで公開処理内容を確認。
+if release_type == "ini"
+  puts "Initial data release: #{mtbks_idf}"
+  puts "Copy files from #{idf_dir} to #{public_file_path}/#{mtbks_idf}"
+  puts "Public release date: #{initial_release_date}"
+  puts "Last update date: #{last_update_date}"
+  puts "WARNING: study directory already exists for initial data release." if Dir.exist?("#{public_file_path}/#{mtbks_idf}")
+elsif release_type == "re"
+  puts "Re-distribution: #{mtbks_idf}"
+  puts "Copy files from #{idf_dir} to #{public_file_path}/#{mtbks_idf} manually."
+  puts "Public release date: #{public_release_date}"
+  puts "Last update date: #{last_update_date}"
+  puts "WARNING: You need to manually copy and/or delete files and change timestamp of the files manually." if release_type == "re"
+end
+
+puts ""
+puts 'Execute data release? Enter "y" or "n"'
+
+#キーボードからの入力を受付け
+case gets.chomp
+
+  when "yes", "YES", "y"
+
+    # ファイルの存在チェック
+    raise "IDF not found: #{idf_path}" unless File.exist?(idf_path)
+    raise "SDRF not found: #{sdrf_path}" unless File.exist?(sdrf_path)
+
+    # public IDF
+    idf_public_f = open("#{idf_path.sub(".idf.txt", ".public.idf.txt")}", "w")
+
+    for line_a in idf_a
+
+      field_name = line_a[0]
+      field_value_a = line_a[1..-1]
+
+      # 空行挿入
+      idf_public_f.puts "" if blank_line_before_a.include?(field_name)
+
+      # auto-correction
+      if field_name == "Person Email"
+        # do nothing
+      elsif idf_corrected_h[field_name]
+        idf_public_f.puts "#{field_name}\t#{idf_corrected_h[field_name].collect{|e| e.match(/\n|\t/) ? '"' + e + '"' : e }.join("\t")}"
+      else
+        idf_public_f.puts "#{line_a.collect{|e| e.match(/\n|\t/) ? '"' + e + '"' : e }.join("\t")}"
+      end
+
+    end
+
+    idf_public_f.close
+
+    # public SDRF
+    sdrf_public_f = open("#{sdrf_path.sub(".sdrf.txt", ".public.sdrf.txt")}", "w")
+
+    # SDRF から md5値カラムを削除。
+    sdrf_header_a = sdrf_a[0]
+    sdrf_md_index_a = sdrf_header_a.each_index.select{|e| ["Comment[Raw Data File md5]", "Comment[Processed Data File md5]", "Comment[Metabolite Assignment File md5]"].include?(sdrf_header_a[e])}
+
+    sdrf_public_a = []
+    for sdrf_line_a in sdrf_a
+      sdrf_public_a.push(sdrf_line_a.reject.with_index{|e,i| sdrf_md_index_a.include?(i)})
+    end
+
+    for sdrf_public_line_a in sdrf_public_a
+      sdrf_public_f.puts sdrf_public_line_a.join("\t")
+    end
+
+    sdrf_public_f.close
+
+    # ファイルコピーと移動は初回公開時のみ。再公開時のファイル処理はマニュアルで実施。
+    if release_type == "ini"
+
+      puts "Initial data release: #{mtbks_idf}"
+
+      unless Dir.exist?("#{public_file_path}/#{mtbks_idf}")
+        puts "mkdir #{public_file_path}/#{mtbks_idf}"
+        `mkdir #{public_file_path}/#{mtbks_idf}`
+      end
+
+      # trimmed IDF の public への mv
+      puts "mv -f #{idf_dir}/#{mtbks_idf}.public.idf.txt #{public_file_path}/#{mtbks_idf}/#{mtbks_idf}.idf.txt"
+      `mv -f #{idf_dir}/#{mtbks_idf}.public.idf.txt #{public_file_path}/#{mtbks_idf}/#{mtbks_idf}.idf.txt`
+
+      # trimmed SDRF の public への mv
+      puts "mv -f #{idf_dir}/#{mtbks_idf}.public.sdrf.txt #{public_file_path}/#{mtbks_idf}/#{mtbks_idf}.sdrf.txt"
+      `mv -f #{idf_dir}/#{mtbks_idf}.public.sdrf.txt #{public_file_path}/#{mtbks_idf}/#{mtbks_idf}.sdrf.txt`
+
+      if Dir.glob("#{idf_dir}/#{mtbks_idf}*.maf.txt").size > 0
+        puts "cp #{idf_dir}/#{mtbks_idf}.*.maf.txt #{public_file_path}/#{mtbks_idf}"
+        `cp #{idf_dir}/#{mtbks_idf}.*.maf.txt #{public_file_path}/#{mtbks_idf}`
+      end
+
+      if Dir.exist?("#{idf_dir}/raw")
+        puts "cp -r #{idf_dir}/raw #{public_file_path}/#{mtbks_idf}"
+        `cp -r #{idf_dir}/raw #{public_file_path}/#{mtbks_idf}`
+      end
+
+      if Dir.exist?("#{idf_dir}/processed")
+        puts "cp -r #{idf_dir}/processed #{public_file_path}/#{mtbks_idf}"
+        `cp -r #{idf_dir}/processed #{public_file_path}/#{mtbks_idf}`
+      end
+
+    elsif release_type == "re"
+
+      puts "Re-distribution: #{mtbks_idf}"
+      puts "Public versions of idf (#{mtbks_idf}.public.idf.txt) and sdrf (#{mtbks_idf}.public.sdrf.txt) are generated under #{idf_dir}"
+      puts "Move public versions of idf and sdrf (if necessary) files to the public directory. Copy and delete data files manually.: #{mtbks_idf}"
+
+    end # if release_type == "ini"
+
+  when "no", "NO", "n"
+    puts "Date release not executed."
+    exit 1
+
+end
