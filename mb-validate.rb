@@ -42,7 +42,7 @@ OptionParser.new{|opt|
 	}
 
 	opt.on('-s [SDRF file]', 'SDRF file path'){|v|
-		
+
 		if v == ""
 			sdrf_path = idf_path.sub(".idf.txt", ".sdrf.txt")
 		else
@@ -53,7 +53,7 @@ OptionParser.new{|opt|
 	}
 
 	opt.on('-t [BioSample tsv file]', 'BioSample tsv'){|v|
-		
+
 		if v != ""
 			bs_path = v
 			puts "BioSample tsv: #{v}"
@@ -62,7 +62,7 @@ OptionParser.new{|opt|
 	}
 
 	opt.on('-m [md5 checksum file]', 'md5sum file'){|v|
-		
+
 		if v != ""
 			md_path = v
 			puts "md5 checksum file: #{v}"
@@ -71,19 +71,19 @@ OptionParser.new{|opt|
 	}
 
 	opt.on('-d', 'Check data files'){|v|
-		
+
 		data_file_validation_flag = true
 
 	}
 
 	opt.on('-a', 'Auto-correction'){|v|
-				
+
 		auto_correction_flag = true
 
 	}
 
 	opt.on('-o [output corrected file]', 'output directory of corrected files'){|v|
-		
+
 		if v == ""
 			corrected_dir = File.dirname(idf_path)
 		else
@@ -104,7 +104,7 @@ OptionParser.new{|opt|
 		if corrected_dir.empty?
 			corrected_dir = File.dirname(idf_path)
 			puts "Auto-corrected files will be generated at #{corrected_dir}" if auto_correction_flag
-		else		
+		else
 			puts "Auto-corrected files will be generated at #{corrected_dir}" if auto_correction_flag
 		end
 
@@ -155,7 +155,7 @@ if md_path != ""
 	for line in md_f.readlines
 		if line =~ /^([A-Za-z0-9]{32})  (.*)$/
 			different_md_file_a.push($2) if md_h[$2] && md_h[$2] != $1
-			md_h.store($2, $1)			
+			md_h.store($2, $1)
 		end
 	end
 	md_f.close
@@ -270,7 +270,7 @@ idf_missing_required_fields_group_error_a = []
 for group_name, group_field_a in idf_required_fields_group_error_h
 	# Publication etc が項目として存在し、かつメイン項目 (json 定義配列の最初の項目) が空ではないとき。全部空はあり得る
 	if idf_group_h[group_name]
-		for group_h in idf_group_h[group_name]		
+		for group_h in idf_group_h[group_name]
 			if group_h[group_field_a[0]] != ""
 				for group_field in group_field_a
 					if group_h[group_field].nil? || group_h[group_field].empty?
@@ -296,7 +296,7 @@ idf_missing_required_fields_group_warning_a = []
 for group_name, group_field_a in idf_required_fields_group_warning_h
 	# Publication etc が項目として存在する場合のみ
 	if idf_group_h[group_name]
-		for group_h in idf_group_h[group_name]		
+		for group_h in idf_group_h[group_name]
 			for group_field in group_field_a
 				if group_h[group_field].nil? || group_h[group_field].empty?
 					idf_missing_required_fields_group_warning_a.push(group_name)
@@ -340,9 +340,9 @@ open("#{conf_path}/controlled_terms.json"){|f|
 }
 
 idf_field_not_cv_error_h = {}
-for field, cv_term_a in idf_not_cv_error_h	
+for field, cv_term_a in idf_not_cv_error_h
 	if idf_h[field]
-		if (idf_h[field] - cv_term_a).size > 0			
+		if (idf_h[field] - cv_term_a).size > 0
 			idf_field_not_cv_error_h.store(field, (idf_h[field] - cv_term_a).join(","))
 		end
 	end
@@ -350,7 +350,7 @@ end
 
 if idf_field_not_cv_error_h.size > 0
 	for key, value in idf_field_not_cv_error_h
-		error_idf_a.push(["MB_IR0015", "error", "Value is not in controlled terms: #{idf_file} #{key}:#{value}"])	
+		error_idf_a.push(["MB_IR0015", "error", "Value is not in controlled terms: #{idf_file} #{key}:#{value}"])
 	end
 end
 
@@ -372,7 +372,7 @@ end
 
 if idf_field_not_cv_warning_h.size > 0
 	for key, value in idf_field_not_cv_warning_h
-		warning_idf_a.push(["MB_IR0016", "warning", "Value is not in controlled terms: #{idf_file} #{key}:#{value}"])	
+		warning_idf_a.push(["MB_IR0016", "warning", "Value is not in controlled terms: #{idf_file} #{key}:#{value}"])
 	end
 end
 
@@ -386,7 +386,7 @@ open("#{conf_path}/idf_required_protocol_types_error.json"){|f|
 }
 
 if idf_required_protocol_types_error_h[submission_type] && idf_h["Protocol Type"] && (idf_required_protocol_types_error_h[submission_type] - idf_h["Protocol Type"]).size > 0
-	error_idf_a.push(["MB_IR0017", "error", "Missing protocol type for submission type: #{idf_file} #{submission_type}:#{(idf_required_protocol_types_error_h[submission_type] - idf_h["Protocol Type"]).join(",")}"])	
+	error_idf_a.push(["MB_IR0017", "error", "Missing protocol type for submission type: #{idf_file} #{submission_type}:#{(idf_required_protocol_types_error_h[submission_type] - idf_h["Protocol Type"]).join(",")}"])
 end
 
 
@@ -398,18 +398,18 @@ open("#{conf_path}/idf_required_protocol_parameters_error.json"){|f|
 
 if idf_required_protocol_parameters_error_h[submission_type]
 	for protocol_type, parameter_a in idf_required_protocol_parameters_error_h[submission_type]
-		
+
 		if idf_group_h["Protocol"]
 
 			for protocol_h in idf_group_h["Protocol"]
-				
+
 				if protocol_h["Protocol Type"] && protocol_h["Protocol Type"] == protocol_type
-					
+
 					## missing
 					if (parameter_a - protocol_h["Protocol Parameters"].split(";")).size > 0
 						error_idf_a.push(["MB_IR0018", "error", "Missing protocol parameter for submission type: #{idf_file} #{submission_type} #{protocol_type}:#{(parameter_a - protocol_h["Protocol Parameters"].split(";")).join(",")}"])
 					end
-				
+
 					## additional
 					if (protocol_h["Protocol Parameters"].split(";") - parameter_a).size > 0
 						warning_idf_a.push(["MB_IR0036", "warning", "Protocol parameter(s) is added by user besides default parameters for the submission type: #{idf_file} #{submission_type} #{protocol_type}:#{(protocol_h["Protocol Parameters"].split(";") - parameter_a).join(",")}"])
@@ -418,7 +418,7 @@ if idf_required_protocol_parameters_error_h[submission_type]
 				end
 			end
 		end
-	end	
+	end
 end
 
 
@@ -429,9 +429,9 @@ person_number = 0
 person_without_email_a = []
 if idf_group_h["Person"]
 	for person_h in idf_group_h["Person"]
-		
+
 		person_number += 1
-		
+
 		if person_h["Person Roles"] == "submitter"
 			submitter_number += 1
 		end
@@ -517,10 +517,10 @@ for field_name, field_value_a in idf_h
 	if ["Public Release Date", "Comment[Submission Date]", "Comment[Last Update Date]"].include?(field_name)
 		unless field_value_a[0] == "" || field_value_a[0] =~ /20\d{2}-\d{2}-\d{2}/
 			if field_value_a[0] =~ %r@(\d{4})/(\d{1,2})/(\d{1,2})@
-				error_idf_a.push(["MB_IR0013", "error", "Invalid date format: #{idf_file} #{field_name} #{field_value_a[0]} auto-corrected to: #{$1}-#{$2.rjust(2, "0")}-#{$3.rjust(2, "0")}"])			
+				error_idf_a.push(["MB_IR0013", "error", "Invalid date format: #{idf_file} #{field_name} #{field_value_a[0]} auto-corrected to: #{$1}-#{$2.rjust(2, "0")}-#{$3.rjust(2, "0")}"])
 				idf_corrected_h.store(field_name, ["#{$1}-#{$2.rjust(2, "0")}-#{$3.rjust(2, "0")}"])
 			else
-				error_idf_a.push(["MB_IR0013", "error", "Invalid date format: #{idf_file} #{field_name} #{field_value_a[0]}"])			
+				error_idf_a.push(["MB_IR0013", "error", "Invalid date format: #{idf_file} #{field_name} #{field_value_a[0]}"])
 			end
 		end
 	end
@@ -536,8 +536,8 @@ for field_name, field_value_a in idf_h
 
 	### MB_IR0034 error Missing experiment type for submission type
 	if field_name == "Comment[Experiment type]" && idf_required_experiment_types_error_h[submission_type] && (idf_required_experiment_types_error_h[submission_type] - field_value_a).size > 0
-		error_idf_a.push(["MB_IR0034", "error", "Missing experiment type for submission type: #{idf_file} #{submission_type}:#{(idf_required_experiment_types_error_h[submission_type] - field_value_a).join(",")} The experiment type is automatically added based on the submission type."])		
-		
+		error_idf_a.push(["MB_IR0034", "error", "Missing experiment type for submission type: #{idf_file} #{submission_type}:#{(idf_required_experiment_types_error_h[submission_type] - field_value_a).join(",")} The experiment type is automatically added based on the submission type."])
+
 		# submission type で必要な experiment type を追加
 		experiment_type_added_a = field_value_a
 		idf_required_experiment_types_error_h[submission_type].each{|type|
@@ -552,7 +552,7 @@ for field_name, field_value_a in idf_h
 	corrected_field_value_a = []
 	corrected = false
 	for field_value in field_value_a
-	
+
 		corrected_field_value = ""
 
 		### MB_IR0021 warning Invalid value for null
@@ -575,18 +575,18 @@ for field_name, field_value_a in idf_h
 
 		### MB_IR0024 error Invalid characters
 		unless field_value.ascii_only?
-			
+
 			if field_name == "Study Description" || field_name == "Protocol Description"
 
 				replaced_char = ""
 				invalid_char = false
-				for char in field_value.chars						
-					
+				for char in field_value.chars
+
 					if char =~ /[^[:ascii:]]/ && char !~ /([\\x00-\\x7F]|\s|°|±|°|μ|\u2103|\u00D7|\u00B5|\u2266|\u2267|\u2253|≠|←|→|↑|↓|↔|Å|[Α-Ω]|[α-ω])/
 						char = "#NG#"
 						invalid_char = true
 					end
-					
+
 					replaced_char += char
 
 				end
@@ -623,7 +623,7 @@ for field_name, field_value_a in idf_h
 			end
 		end
 
-		# auto-correct された value		
+		# auto-correct された value
 		if corrected_field_value != ""
 			corrected_field_value_a.push(corrected_field_value)
 			corrected = true
@@ -643,7 +643,7 @@ end
 
 #
 # IDF validation 結果出力
-# 
+#
 puts ""
 puts "IDF validation results"
 puts "---------------------------------------------"
@@ -687,7 +687,7 @@ end
 
 ### MB_SR0004 error Missing required column
 sdrf_required_columns_error_a = []
-open("#{conf_path}/sdrf_required_columns_error.json"){|f|	
+open("#{conf_path}/sdrf_required_columns_error.json"){|f|
 	sdrf_required_columns_error_a = JSON.load(f)
 
 	# MSI は Extract Name がないので除外。
@@ -698,13 +698,13 @@ missing_sdrf_required_columns_error_a = []
 all_null_sdrf_required_columns_error_a = []
 ## カラム、値がない
 for sdrf_required_column in sdrf_required_columns_error_a
-	
+
 	# カラムがない
 	if sdrf_transpose_h[sdrf_required_column].nil?
 		missing_sdrf_required_columns_error_a.push(sdrf_required_column)
 	## MB_SR0009 error Missing or null value for required column
 	# 全て null value か空欄
-	elsif (sdrf_transpose_h[sdrf_required_column] - null_values_a.push("")).size == 0		
+	elsif (sdrf_transpose_h[sdrf_required_column] - null_values_a.push("")).size == 0
 		all_null_sdrf_required_columns_error_a.push(sdrf_required_column)
 	end
 
@@ -736,9 +736,9 @@ for sdrf_required_columns_warning in sdrf_required_columns_warning_a
 	all_missing = false
 	sdrf_header_a.each{|sdrf_header|
 		if sdrf_header =~ /#{sdrf_required_columns_warning}/
-			
+
 			exist = true
-			
+
 			# 値が全部空もしくは null value
 			if (sdrf_transpose_h[sdrf_header] - null_values_a.push("")).size == 0
 				all_null_sdrf_required_columns_warning_a.push(sdrf_header)
@@ -820,17 +820,17 @@ if factor_value_h.size == 1
 
 else
 
-	factor_value_combined_a = []	
+	factor_value_combined_a = []
 
 	if factor_value_h.values[0]
-		
+
 		factor_value_h.values[0].size.times{|i|
-			
+
 			factor_value_combined_temp_a = []
 			factor_value_h.values.each{|factor_value_a|
 				factor_value_combined_temp_a.push(factor_value_a[i])
 			}
-			
+
 			factor_value_combined_a.push(factor_value_combined_temp_a)
 
 		}
@@ -877,11 +877,11 @@ for biosample_accession, sdrf_sample_h in sdrf_bs_h
 		sdrf_sample_h.each{|key, value|
 
 			if bs_h[biosample_accession][key]
-				
+
 				if value != bs_h[biosample_accession][key]
 					diff_attr_a.push(key)
 				end
-				
+
 			# BioSample に属性がない
 			else
 				missing_in_bs_a.push(key) if value != ""
@@ -892,12 +892,12 @@ for biosample_accession, sdrf_sample_h in sdrf_bs_h
 		diff_attr_h.store(biosample_accession, diff_attr_a) unless diff_attr_a.empty?
 		missing_in_bs_h.store(biosample_accession, missing_in_bs_a) unless missing_in_bs_a.empty?
 
-		bs_h[biosample_accession].each{|bskey, bsvalue|			
+		bs_h[biosample_accession].each{|bskey, bsvalue|
 			if bsvalue != "" && !sdrf_sample_h.keys.include?(bskey) && !["biosample_accession", "bioproject_id", "sample_name"].include?(bskey)
 				missing_in_sdrf_a.push(key)
 			end
 		}
-		
+
 		if missing_in_sdrf_a.size > 0
 			missing_in_sdrf_h.store(biosample_accession, missing_in_sdrf_a) unless missing_in_sdrf_a.empty?
 		end
@@ -915,7 +915,7 @@ end
 
 ### MB_SR0021 warning Missing biosample attribute
 if missing_in_sdrf_h.size > 0
-	
+
 	for biosample_accession, missing_in_sdrf_a in missing_in_sdrf_h
 		warning_sdrf_bs_a.push(["MB_SR0021", "warning", "Missing biosample attribute: #{sdrf_file} #{biosample_accession}:#{missing_in_sdrf_a.join(",")}"])
 	end
@@ -924,7 +924,7 @@ end
 
 ### MB_SR0022 warning No Biosample attribute
 if missing_in_bs_h.size > 0
-	
+
 	for biosample_accession, missing_in_bs_a in missing_in_bs_h
 		warning_sdrf_bs_a.push(["MB_SR0022", "warning", "SDRF characteristics are not in BioSample attributes: #{sdrf_file} #{biosample_accession}:#{missing_in_bs_a.join(",")}"])
 	end
@@ -933,7 +933,7 @@ end
 
 ### MB_SR0023 error ignore Characteristics and BioSample attributes unmatch
 if diff_attr_h.size > 0
-	
+
 	for biosample_accession, diff_attr_a in diff_attr_h
 		error_ignore_sdrf_bs_a.push(["MB_SR0023", "error_ignore", "SDRF characteristics and BioSample attributes are different: #{sdrf_file} #{biosample_accession}:#{diff_attr_a.join(",")}"])
 	end
@@ -992,10 +992,10 @@ name_regex_a = [
 
 name_unspecified_a = []
 for sdrf_header in sdrf_header_a
-	
-	name_regex_a.each{|regex|		
-	
-		if sdrf_header =~ /#{regex}/	
+
+	name_regex_a.each{|regex|
+
+		if sdrf_header =~ /#{regex}/
 			name_unspecified_a.push(sdrf_header) if $1 == "" || $1 =~ /^ +$/
 		end
 	}
@@ -1036,8 +1036,8 @@ sdrf_protocol_ref_index_a.each{|i|
 	protocol_types_in_ref_a = []
 
 	protocol_ref_a = []
-	for sdrf_line_a in sdrf_a[1..-1]		
-		protocol_ref_a.push(sdrf_line_a[i])	
+	for sdrf_line_a in sdrf_a[1..-1]
+		protocol_ref_a.push(sdrf_line_a[i])
 	end
 
 	# Protocol REF に記載されている最初の IDF 定義 protocol name を取得
@@ -1061,7 +1061,7 @@ sdrf_protocol_ref_index_a.each{|i|
 	protocol_type_in_ref_a.push(protocol_types_in_ref_a.sort.uniq[0])
 
 	### MB_SR0033 error ignore Missing protocol reference
-	
+
 	if protocol_types_in_ref_a.sort.uniq.size == 0
 		error_ignore_sdrf_a.push(["MB_SR0033", "error_ignore", "Protocol name is not referenced in Protocol REF: #{sdrf_file} Protocol REF at column #{i}"])
 	end
@@ -1091,7 +1091,7 @@ if sdrf_protocol_ref_index_a.size == protocol_type_in_ref_a.size
 			j += 1
 		# Protocol REF 以外
 		else
-			
+
 			# 連続する Characteristics[] は一つにまとめる。name チェックは別でやっているのでカラムを拾うため正規表現は緩い
 			if sdrf_header =~ /Characteristics\[.*\]/
 				sdrf_header_frame_a.push("Characteristics[]")
@@ -1100,7 +1100,7 @@ if sdrf_protocol_ref_index_a.size == protocol_type_in_ref_a.size
 				sdrf_header_frame_a.push("Factor Value[]")
 			# Characteristics[] 以外
 			else
-				
+
 				# Comment を除外
 				unless sdrf_header =~ /Comment\[.*\]/ || sdrf_header =~ /Unit\[.*\]/
 					sdrf_header_frame_a.push(sdrf_header)
@@ -1109,10 +1109,10 @@ if sdrf_protocol_ref_index_a.size == protocol_type_in_ref_a.size
 			end
 
 		end
-		
+
 		i += 1
 
-	end	
+	end
 
 end
 
@@ -1131,16 +1131,16 @@ for sdrf_header, sdrf_value_a in sdrf_transpose_h
 		if get_dimension(sdrf_value) == 0
 
 			unless sdrf_value.ascii_only?
-							
+
 				replaced_char = ""
 				invalid_char = false
-				for char in sdrf_value.chars						
-					
+				for char in sdrf_value.chars
+
 					if char =~ /[^[:ascii:]]/
 						char = "#NG#"
 						invalid_char = true
 					end
-					
+
 					replaced_char += char
 
 				end
@@ -1154,16 +1154,16 @@ for sdrf_header, sdrf_value_a in sdrf_transpose_h
 			for sdrf_value_term in sdrf_value
 
 				unless sdrf_value_term.ascii_only?
-								
+
 					replaced_char = ""
 					invalid_char = false
-					for char in sdrf_value_term.chars						
-						
+					for char in sdrf_value_term.chars
+
 						if char =~ /[^[:ascii:]]/
 							char = "#NG#"
 							invalid_char = true
 						end
-						
+
 						replaced_char += char
 
 					end
@@ -1173,7 +1173,7 @@ for sdrf_header, sdrf_value_a in sdrf_transpose_h
 				end
 
 			end
-			
+
 		end
 
 	end
@@ -1198,14 +1198,14 @@ for file_column_name, file_column_name_md in file_column_a
 			for data_file_a in sdrf_transpose_h[file_column_name]
 				data_file_a.size.times{|j|
 					different_md_meta_a.push(data_file_a[j]) if data_files_meta_h[data_file_a[j]] && data_files_meta_h[data_file_a[j]] != sdrf_transpose_h[file_column_name_md][i][j]
-					data_files_meta_h.store(data_file_a[j], sdrf_transpose_h[file_column_name_md][i][j])					
+					data_files_meta_h.store(data_file_a[j], sdrf_transpose_h[file_column_name_md][i][j])
 				}
 				i += 1
 			end
 		elsif get_dimension(sdrf_transpose_h[file_column_name]) == 1 && get_dimension(sdrf_transpose_h[file_column_name_md]) == 1
 			sdrf_transpose_h[file_column_name].size.times{|i|
 				different_md_meta_a.push(sdrf_transpose_h[file_column_name][i]) if data_files_meta_h[sdrf_transpose_h[file_column_name][i]] && data_files_meta_h[sdrf_transpose_h[file_column_name][i]] != sdrf_transpose_h[file_column_name_md][i]
-				data_files_meta_h.store(sdrf_transpose_h[file_column_name][i], sdrf_transpose_h[file_column_name_md][i])				
+				data_files_meta_h.store(sdrf_transpose_h[file_column_name][i], sdrf_transpose_h[file_column_name_md][i])
 			}
 		end
 
@@ -1302,8 +1302,8 @@ if data_file_validation_flag
 	not_specified_file_a = []
 	noexist_filename_a = []
 	for data_filename in data_files_meta_h.keys
-		
-		if subdir_meta_a.include?(data_filename)		
+
+		if subdir_meta_a.include?(data_filename)
 			noexist_filename_a.push(data_filename) unless Dir.exist?("#{idf_dir}/#{data_filename}")
 		else
 			noexist_filename_a.push(data_filename) unless File.exist?("#{idf_dir}/#{data_filename}")
@@ -1316,7 +1316,7 @@ if data_file_validation_flag
 		error_sdrf_a.push(["MB_SR0038", "error", "File specified in SDRF do not exist. #{sdrf_file} #{noexist_filename_a.join(",")}"])
 	end
 
-	## MB_SR0040 warning Un-specified file	
+	## MB_SR0040 warning Un-specified file
 	not_specified_file_a = []
 	(real_file_a - data_files_meta_h.keys).select{|f|
 		match = false
@@ -1340,10 +1340,10 @@ if data_file_validation_flag
 		checksum = `md5sum '#{idf_dir}/#{real_file}'`.sub(/  .*/, "").rstrip
 		real_file_md_h.store(real_file.sub("#{idf_dir}/", ""), checksum)
 	end
-	
-	## SDRF 記載ファイルの md5 一致をチェック	
+
+	## SDRF 記載ファイルの md5 一致をチェック
 	if md_h.size == 0
-	
+
 		for data_file, data_file_md in data_files_meta_h
 			if real_file_md_h[data_file] && data_file_md != "" && data_file_md != real_file_md_h[data_file]
 				file_md_unmatch_a.push([data_file, "meta:#{data_file_md}", "real:#{real_file_md_h[data_file]}"])
@@ -1351,18 +1351,18 @@ if data_file_validation_flag
 		end
 
 	else
-		
+
 		for data_file, data_file_md in md_h
 			if real_file_md_h[data_file] && data_file_md != "" && data_file_md != real_file_md_h[data_file]
 				file_md_unmatch_a.push([data_file, "meta:#{data_file_md}", "real:#{real_file_md_h[data_file]}"])
 			end
 		end
 
-	end	
+	end
 
 	## MB_SR0041 warning Different checksum
 	if file_md_unmatch_a.size > 0
-		
+
 		file_md_unmatch_s = "\n"
 		file_md_unmatch_a.each{|line_a|
 			file_md_unmatch_s += "#{line_a.join("  ")}\n"
@@ -1397,17 +1397,18 @@ if data_file_validation_flag
 		for maf in maf_a
 			maf_f = open(maf)
 			maf_header_a = maf_f.readlines[0].rstrip.split("\t")
-		end
 
-		## MB_SR0042 error ignore Invalid MAF format
-		if maf_column_h["NMR"] != maf_header_a.slice(0, maf_column_h["MS"].size)
-			error_ignore_sdrf_a.push(["MB_SR0042", "error_ignore", "Invalid MAF format: #{maf.sub("#{idf_dir}/", "")}, type NMR: #{(maf_column_h["MS"] - maf_header_a.slice(0, maf_column_h["MS"].size)).join(",")}"])
-		end
+      ## MB_SR0042 error ignore Invalid MAF format
+      if maf_column_h["NMR"] != maf_header_a.slice(0, maf_column_h["NMR"].size)
+        error_ignore_sdrf_a.push(["MB_SR0042", "error_ignore", "Invalid MAF format: #{maf.sub("#{idf_dir}/", "")}, type NMR: #{(maf_column_h["NMR"] - maf_header_a.slice(0, maf_column_h["NMR"].size)).join(",")}"])
+      end
+
+    end
 
 	else
 
 		for maf in maf_a
-		
+
 			maf_f = open(maf)
 			maf_header_a = maf_f.readlines[0].rstrip.split("\t")
 
@@ -1419,10 +1420,10 @@ if data_file_validation_flag
 
 			## MB_SR0044 MB_SR0045 MAF assay name
 			## 規定カラムが無いことを想定し、peak_identifier よりも後ろのカラムを assay section とする。
-			if maf_header_a.index("peak_identifier")				
-				
+			if maf_header_a.index("peak_identifier")
+
 				maf_header_assay_name_a = maf_header_a.slice(maf_header_a.index("peak_identifier") + 1, maf_header_a.size - maf_header_a.index("peak_identifier"))
-				
+
 				## MB_SR0044 warning Undefined assay name in MAF
 				if (maf_header_assay_name_a - sdrf_transpose_h["Assay Name"]).sort.uniq.size > 0
 					warning_sdrf_a.push(["MB_SR0044", "warning", "Assay name(s) in MAF is not defined in SDRF: #{maf.sub("#{idf_dir}/", "")} #{(maf_header_assay_name_a - sdrf_transpose_h["Assay Name"]).sort.uniq.join(",")}"])
@@ -1438,7 +1439,7 @@ end # if data_file_validation_flag
 
 #
 # SDRF validation 結果出力
-# 
+#
 puts ""
 puts "SDRF validation results"
 puts "---------------------------------------------"
@@ -1471,14 +1472,14 @@ end
 
 
 if idf_h["Experimental Factor Name"]
-		
+
 	if sdrf_factor_value_name_a.empty?
 		idf_corrected_h.store("Experimental Factor Name", ["missing"])
-		idf_corrected_h.store("Experimental Factor Type", ["missing"])		
+		idf_corrected_h.store("Experimental Factor Type", ["missing"])
 	else
-		
+
 		diff_a = idf_h["Experimental Factor Name"] - sdrf_factor_value_name_a
-		if diff_a.size > 0	
+		if diff_a.size > 0
 
 			error_ignore_idf_sdrf_a.push(["MB_CR0001", "error_ignore", "IDF Experimental Factor Name and SDRF Factor Value name do not match: #{idf_file} #{diff_a.join(",")}, auto-corrected to Factor Value names in SDRF"])
 			idf_corrected_h.store("Experimental Factor Name", sdrf_factor_value_name_a)
@@ -1506,7 +1507,7 @@ protocol_parameter_a = []
 i = 1
 for sdrf_header_in_frame in sdrf_header_frame_a
 
-	if sdrf_header_in_frame =~ /Protocol REF:([-_ \/A-Za-z0-9.]+)/		
+	if sdrf_header_in_frame =~ /Protocol REF:([-_ \/A-Za-z0-9.]+)/
 		protocol_type = $1
 	end
 
@@ -1531,9 +1532,9 @@ protocol_type_unmatch_parameter_h = {}
 for protocol_type, protocol_type_parameter_a in protocol_type_parameter_h
 
 	if idf_group_h["Protocol"]
-	
+
 		for protocol_h in idf_group_h["Protocol"]
-			
+
 			if protocol_h["Protocol Type"] == protocol_type
 				unless protocol_h["Protocol Parameters"].split(";") == protocol_type_parameter_a
 					protocol_type_unmatch_parameter_h.store(protocol_type, (protocol_h["Protocol Parameters"].split(";") - protocol_type_parameter_a | protocol_type_parameter_a - protocol_h["Protocol Parameters"].split(";")))
@@ -1541,13 +1542,13 @@ for protocol_type, protocol_type_parameter_a in protocol_type_parameter_h
 			end
 
 		end
-	
+
 	end
 
 end
 
 if protocol_type_unmatch_parameter_h.size > 0
-	
+
 	for protocol_type, protocol_type_unmatch_parameter_a in protocol_type_unmatch_parameter_h
 		error_ignore_idf_sdrf_a.push(["MB_CR0003", "error_ignore", "Protocol Parameter unmatch: #{idf_file} #{protocol_type}:#{protocol_type_unmatch_parameter_a.join(",")}, auto-corrected to Protocol Parameters in SDRF"])
 	end
@@ -1559,7 +1560,7 @@ if protocol_type_unmatch_parameter_h.size > 0
 			protocol_parameter_corrected_a.push(protocol_type_parameter_h[protocol_type_idf].join(";"))
 		end
 	}
-	
+
 	idf_corrected_h.store("Protocol Parameters", protocol_parameter_corrected_a)
 
 end
@@ -1579,7 +1580,7 @@ end
 
 #
 # IDF & SDRF validation 結果出力
-# 
+#
 puts ""
 puts "IDF and SDRF validation results"
 puts "---------------------------------------------"
@@ -1664,7 +1665,7 @@ end
 
 #
 # SDRF & BioSample validation 結果出力
-# 
+#
 if bs_path != ""
 	puts ""
 	puts "SDRF and BioSample validation results"
