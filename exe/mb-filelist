@@ -1,10 +1,10 @@
-#! /usr/bin/ruby
+#! /usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-require 'rubygems'
 require 'pp'
 require 'date'
 require 'fileutils'
+require 'optparse'
 
 #
 # 生命情報・DDBJ センター
@@ -15,10 +15,27 @@ require 'fileutils'
 ## 仕様
 # https://ddbj-dev.atlassian.net/wiki/spaces/metabobank/pages/2016837775/livelist+filelist#%E5%85%A8%E4%BD%93-livelist
 
-public_file_path = "public/study"
-#public_file_path = "/lustre6/public/metabobank/study"
+public_file_path = nil
+opt = OptionParser.new{|opt|
+  opt.on('-p PATH', 'public file path'){|v|
+    public_file_path = v
+  }
+}
+
+begin
+  opt.parse!
+rescue OptionParser::MissingArgument, OptionParser::InvalidArgument
+  warn opt.to_s
+  exit 1
+end
+
+if public_file_path.nil?
+  warn opt.to_s
+  exit 1
+end
 
 today = Date.today.strftime('%Y-%m-%d')
+FileUtils.mkdir_p('log')
 filelist_log_file = open("./log/mb-filelist-#{today}-log.txt", "w")
 
 ## public MTBKS IDF があるディレクトリのみ対象
