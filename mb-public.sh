@@ -37,5 +37,5 @@ esac
 done
 
 # 実行
-echo "singularity exec -B /lustre9/open/shared_data/metabobank/study:/lustre9/open/shared_data/metabobank/study /home/mbadmin/mb-tools.simg mb-public.rb${I}${R}${D}${U}"
-singularity exec -B /lustre9/open/shared_data/metabobank/study:/lustre9/open/shared_data/metabobank/study /home/mbadmin/mb-tools.simg mb-public.rb${I}${R}${D}${U}
+echo "singularity exec -B /lustre9/open/shared_data/metabobank/study:/lustre9/open/shared_data/metabobank/study /home/mbadmin/mb-tools.simg mb-public${I}${R}${D}${U}"
+singularity exec -B /lustre9/open/shared_data/metabobank/study:/lustre9/open/shared_data/metabobank/study /home/mbadmin/mb-tools.simg mb-public${I}${R}${D}${U}
