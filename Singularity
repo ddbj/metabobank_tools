@@ -16,6 +16,7 @@ From: ubuntu:20.04
 
 %environment
     export RUBYOPT='-EUTF-8'
+    export PUBLIC_FILE_PATH='/lustre6/public/metabobank/study'
 
 
 %labels

@@ -14,7 +14,7 @@ require 'fileutils'
 ## 仕様
 # https://ddbj-dev.atlassian.net/wiki/spaces/metabobank/pages/2016837775/livelist+filelist#%E5%85%A8%E4%BD%93-livelist
 
-public_file_path = 'study'
+public_file_path = ENV.fetch('PUBLIC_FILE_PATH', 'public/study')
 
 today = Date.today.strftime('%Y-%m-%d')
 filelist_log_file = open("./log/mb-filelist-#{today}-log.txt", "w")
