@@ -18,6 +18,7 @@ require 'metabobank_tools/mb-method'
 ###
 ### 設定
 ###
+public_file_path = 'study'
 conf_path = File.expand_path('../conf', __dir__)
 
 ###
@@ -29,10 +30,9 @@ idf_path = nil
 release_type = nil
 initial_release_date = nil
 last_update_date = Date.today.strftime("%Y-%m-%d")
-public_file_path = nil
 
 opt = OptionParser.new {|opt|
-  opt.on('-i IDF', 'IDF file path') {|v|
+  opt.on('-i PATH', 'IDF file path') {|v|
     idf_path = v
   }
 
@@ -49,10 +49,6 @@ opt = OptionParser.new {|opt|
   opt.on('-u DATE', "last update date (default: #{last_update_date})", /20\d{2}-\d{2}-\d{2}/) {|v|
     last_update_date = v
   }
-
-  opt.on('-p PATH', 'public file path') {|v|
-    public_file_path = v
-  }
 }
 
 begin
@@ -62,8 +58,8 @@ rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
   exit 1
 end
 
-if idf_path.nil? || release_type.nil? || initial_release_date.nil? || public_file_path.nil?
-  warn 'required option: -i, -r, -d, -p'
+if idf_path.nil? || release_type.nil? || initial_release_date.nil?
+  warn 'required option: -i, -r, -d'
   exit 1
 end
 
