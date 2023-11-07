@@ -27,28 +27,22 @@ conf_path = File.expand_path('../conf', __dir__)
 ## Options
 idf_path = ""
 jira_issue = ""
-OptionParser.new{|opt|
 
-  opt.on('-i [IDF file]', 'IDF file path'){|v|
-    raise "usage: -i IDF file (MTBKS1.idf.txt)" if v.nil?
+OptionParser.new{|opt|
+  opt.on('-i PATH', 'IDF file path (MTBKS1.idf.txt)') {|v|
     idf_path = v
   }
 
-  opt.on('-j [Jira issue ID]', 'Jira issue ID (e.g., MBS-7)'){|v|
-    raise "usage: -j Jira issue ID (MBS-7)" if v !~ /MBS-\d{1,}/
+  opt.on('-j JIRA_ISSUE_ID', 'Jira issue ID (e.g., MBS-7)', /MBS-\d{1,}/) {|v|
     jira_issue = v
   }
 
   begin
-
     opt.parse!
-
-  rescue
-
-    puts "Invalid option. #{opt}"
-
+  rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
+    warn e.to_s
+    exit 1
   end
-
 }
 
 ## 設定出力
