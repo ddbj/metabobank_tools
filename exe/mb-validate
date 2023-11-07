@@ -31,50 +31,50 @@ corrected_dir = nil
 data_file_validation_flag = false
 auto_correction_flag = false
 machine_readable = false
-opt = OptionParser.new{|opt|
 
-  opt.on('-i PATH', 'IDF file path'){|v|
+opt = OptionParser.new {|opt|
+  opt.on('-i PATH', 'IDF file path') {|v|
     idf_path = v
   }
 
-  opt.on('-s PATH', 'SDRF file path'){|v|
+  opt.on('-s PATH', 'SDRF file path') {|v|
     sdrf_path = v
   }
 
-  opt.on('-t PATH', 'BioSample tsv path'){|v|
+  opt.on('-t PATH', 'BioSample tsv path') {|v|
     bs_path = v
   }
 
-  opt.on('-m PATH', 'md5sum file path'){|v|
+  opt.on('-m PATH', 'md5sum file path') {|v|
     md_path = v
   }
 
-  opt.on('-d', 'Check data files'){
+  opt.on('-d', 'Check data files') {
     data_file_validation_flag = true
   }
 
-  opt.on('-a', 'Auto-correction'){
+  opt.on('-a', 'Auto-correction') {
     auto_correction_flag = true
   }
 
-  opt.on('-o PATH', 'output directory of corrected files'){|v|
+  opt.on('-o PATH', 'output directory of corrected files') {|v|
     corrected_dir = v
   }
 
-  opt.on('--machine-readable'){
+  opt.on('--machine-readable') {
     machine_readable = true
   }
 }
 
 begin
   opt.parse!
-rescue OptionParser::MissingArgument, OptionParser::InvalidArgument
-  warn opt.to_s
+rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
+  warn e
   exit 1
 end
 
 unless idf_path
-  warn opt.to_s
+  warn "required argument: -i"
   exit 1
 end
 
@@ -99,7 +99,6 @@ end
 ## ファイル名
 idf_file = File.basename(idf_path)
 sdrf_file = File.basename(sdrf_path)
-
 idf_dir = File.dirname(idf_path)
 
 errors = []
