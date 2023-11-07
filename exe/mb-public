@@ -18,7 +18,7 @@ require 'metabobank_tools/mb-method'
 ###
 ### 設定
 ###
-public_file_path = 'study'
+public_file_path = ENV.fetch('PUBLIC_FILE_PATH', 'public/study')
 conf_path = File.expand_path('../conf', __dir__)
 
 ###
