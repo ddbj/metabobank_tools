@@ -74,7 +74,7 @@ rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
 end
 
 unless idf_path
-  warn "required argument: -i"
+  warn 'required option: -i'
   exit 1
 end
 

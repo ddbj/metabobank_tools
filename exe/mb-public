@@ -30,40 +30,40 @@ release_type = nil
 initial_release_date = nil
 last_update_date = Date.today.strftime("%Y-%m-%d")
 public_file_path = nil
-opt = OptionParser.new{|opt|
 
-  opt.on('-i IDF', 'IDF file path'){|v|
+opt = OptionParser.new {|opt|
+  opt.on('-i IDF', 'IDF file path') {|v|
     idf_path = v
   }
 
-  opt.on('-r <ini|re>', 'initial or re-distribution', /\Aini\z|\Are\z/){|v|
+  opt.on('-r <ini|re>', 'initial or re-distribution', /\Aini\z|\Are\z/) {|v|
     release_type = v
   }
 
   # 過去に遡ったデータ公開の場合
-  opt.on('-d DATE', 'initial release date', /20\d{2}-\d{2}-\d{2}/){|v|
+  opt.on('-d DATE', 'initial release date', /20\d{2}-\d{2}-\d{2}/) {|v|
     initial_release_date = v
   }
 
   # 過去に遡ったデータ公開の場合
-  opt.on('-u DATE', "last update date (default: #{last_update_date})", /20\d{2}-\d{2}-\d{2}/){|v|
+  opt.on('-u DATE', "last update date (default: #{last_update_date})", /20\d{2}-\d{2}-\d{2}/) {|v|
     last_update_date = v
   }
 
-  opt.on('-p PATH', 'public file path'){|v|
+  opt.on('-p PATH', 'public file path') {|v|
     public_file_path = v
   }
 }
 
 begin
   opt.parse!
-rescue OptionParser::MissingArgument, OptionParser::InvalidArgument
-  warn opt.to_s
+rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
+  warn e.to_s
   exit 1
 end
 
 if idf_path.nil? || release_type.nil? || initial_release_date.nil? || public_file_path.nil?
-  warn opt.to_s
+  warn 'required option: -i, -r, -d, -p'
   exit 1
 end
 
