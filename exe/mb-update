@@ -29,37 +29,30 @@ idf_path = ""
 last_update_date = Date.today.strftime("%Y-%m-%d")
 status = ""
 reviewer_access_flag = false
-OptionParser.new{|opt|
 
-  opt.on('-i [IDF file]', 'IDF file path'){|v|
-    raise "usage: -i IDF file (MTBKS1.idf.txt)" if v.nil?
+OptionParser.new {|opt|
+  opt.on('-i PATH', 'IDF file path') {|v|
     idf_path = v
   }
 
-  opt.on('-d [last update date]', 'last update date'){|v|
-    raise "usage: -d last update date (yyyy-mm-dd)" unless v =~ /20\d{2}-\d{2}-\d{2}/
+  opt.on('-d DATE', 'last update date (YYYY-MM-DD)', /20\d{2}-\d{2}-\d{2}/) {|v|
     last_update_date = v
   }
 
-  opt.on('-s [status]', 'status'){|v|
-    raise "usage: -s status (temporarily-suppressed, permanently-suppressed, cancelled, killed)" unless ["temporarily-suppressed", "permanently-suppressed", "cancelled", "killed"].include?(v)
+  opt.on('-s STATUS', 'status (temporarily-suppressed, permanently-suppressed, cancelled, killed)', /\A(?:temporarily-suppressed|permanently-suppressed|cancelled|killed)\z/) {|v|
     status = v
   }
 
-  opt.on('-r [reviewer access flag]', 'reviewer access flag'){|v|
+  opt.on('-r', 'reviewer access flag') {
     reviewer_access_flag = true
   }
 
   begin
-
     opt.parse!
-
-  rescue
-
-    puts "Invalid option. #{opt}"
-
+  rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
+    warn e.to_s
+    exit 1
   end
-
 }
 
 ## 設定出力
