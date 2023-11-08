@@ -6,7 +6,7 @@ require 'csv'
 require 'fileutils'
 require 'optparse'
 require 'json'
-require 'metabobank_tools/mb-method'
+require 'metabobank_tools'
 
 #
 # 生命情報・DDBJ センター
@@ -17,7 +17,7 @@ require 'metabobank_tools/mb-method'
 ###
 ### 設定
 ###
-conf_path = File.expand_path('../conf', __dir__)
+conf_path = MetabobankTools.conf_path
 
 ###
 ### 入力

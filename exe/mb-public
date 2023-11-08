@@ -7,7 +7,7 @@ require 'fileutils'
 require 'optparse'
 require 'json'
 require 'time'
-require 'metabobank_tools/mb-method'
+require 'metabobank_tools'
 
 #
 # 生命情報・DDBJ センター
@@ -19,7 +19,7 @@ require 'metabobank_tools/mb-method'
 ### 設定
 ###
 public_file_path = ENV.fetch('PUBLIC_FILE_PATH', 'public/study')
-conf_path = File.expand_path('../conf', __dir__)
+conf_path = MetabobankTools.conf_path
 
 ###
 ### 入力
