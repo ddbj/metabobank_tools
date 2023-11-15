@@ -1575,7 +1575,7 @@ end
 if machine_readable
   errors.concat (warning_idf_sdrf_a + error_ignore_idf_sdrf_a + error_idf_sdrf_a).map {|(code, severity, message)|
     {
-      object_id: 'IDF and SDRF',
+      object_id: '_base',
       code:,
       severity:,
       message:
@@ -1672,7 +1672,7 @@ if bs_path
   if machine_readable
     errors.concat (error_ignore_sdrf_bs_a + warning_sdrf_bs_a).map {|(code, severity, message)|
       {
-        object_id: 'SDRF and BioSample',
+        object_id: 'SDRF',
         code:,
         severity:,
         message:
