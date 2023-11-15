@@ -9,7 +9,7 @@ From: ruby:3.2
     . /opt/metabobank_tools
 
 %environment
-    export PUBLIC_FILE_PATH=/lustre6/public/metabobank/study
+    export PUBLIC_FILE_PATH=/lustre9/open/shared_data/metabobank/study
 
 %post
     cd /opt/metabobank_tools
