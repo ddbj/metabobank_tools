@@ -1,0 +1,159 @@
+#! /usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+require 'pp'
+require 'date'
+require 'fileutils'
+
+#
+# 生命情報・DDBJ センター
+# 2022-06-07 児玉
+# MetaboBank public study filelist 生成
+#
+
+## 仕様
+# https://ddbj-dev.atlassian.net/wiki/spaces/metabobank/pages/2016837775/livelist+filelist#%E5%85%A8%E4%BD%93-livelist
+
+public_file_path = ENV.fetch('PUBLIC_FILE_PATH', 'public/study')
+
+today = Date.today.strftime('%Y-%m-%d')
+filelist_log_file = open("./log/mb-filelist-#{today}-log.txt", "w")
+
+## public MTBKS IDF があるディレクトリのみ対象
+public_study_a = Dir.glob("#{public_file_path}/MTBKS*/MTBKS*idf.txt").collect{|f| f.sub(/\/MTBKS\d{1,}\.idf\.txt/, "")}
+
+## filelist 情報取得。timestamp が変わっていないファイルは既存 filelist の値を使用。
+
+# 既存 filelist の値を取得。
+filelist_a = Dir.glob("#{public_file_path}/MTBKS*/MTBKS*.filelist.txt").select{|f| f =~ /^#{public_file_path}\/MTBKS\d{1,}\/MTBKS\d{1,}\.filelist\.txt$/}
+fileinfo_h = {}
+for filelist in filelist_a
+
+  filelist_f = open(filelist)
+  for line in filelist_f.readlines
+
+    line_a = line.rstrip.split("\t")
+
+    unless line_a[0] =~ /^Type/
+      fileinfo_h.store(line_a[1], line_a[2,3])
+    end
+
+  end
+
+  filelist_f.close
+
+end
+
+# IDF, SDRF, MAF
+idf_file_info_h = {}
+sdrf_file_info_h = {}
+maf_file_info_h = {}
+raw_file_info_h = {}
+processed_file_info_h = {}
+new_file_a = []
+for study_dir in public_study_a
+
+  mtbks_dir = ""
+  if study_dir =~ /\/(MTBKS\d{1,})/
+    mtbks_dir = $1
+  end
+
+  # ファイル。audit/ は除外
+  study_file_a = Dir.glob("#{study_dir}/**/*").select{|f| File.file?(f) && f !~ /\/audit/ && f !~ /MTBKS\d{1,}\.filelist\.txt$/}
+
+  idf_file_info_a = []
+  sdrf_file_info_a = []
+  maf_file_info_a = []
+  raw_file_info_a = []
+  processed_file_info_a = []
+  for study_file in study_file_a
+
+    mtime = `stat -c %y '#{study_file}'`.sub(/\..*/, "").rstrip
+    mtime_utc = DateTime.parse(mtime).new_offset('-0900').strftime("%Y-%m-%dT%H:%M:%SZ")
+    filename = study_file.sub(/#{study_dir}\//, "")
+
+    # filename と timestamp が一致した場合、fielist の既存値を使用。
+    if fileinfo_h[filename] && fileinfo_h[filename][0] == mtime_utc
+      filesize = fileinfo_h[filename][1]
+      checksum = fileinfo_h[filename][2]
+    else
+      filesize = `du -b '#{study_file}'`.sub(/\t.*/, "").rstrip
+      checksum = `md5sum '#{study_file}'`.sub(/  .*/, "").rstrip
+      new_file_a.push(mtbks_dir)
+    end
+
+    idf_file_info_a.push([filename, mtime_utc, filesize.to_i, checksum]) if filename =~ /^#{mtbks_dir}\.idf\.txt$/
+    sdrf_file_info_a.push([filename, mtime_utc, filesize.to_i, checksum]) if filename =~ /^#{mtbks_dir}\.sdrf\.txt$/
+    maf_file_info_a.push([filename, mtime_utc, filesize.to_i, checksum]) if filename =~ /^#{mtbks_dir}\.?[-_A-Za-z0-9.]*\.maf\.txt$/
+    raw_file_info_a.push([filename, mtime_utc, filesize.to_i, checksum]) if filename =~ /^raw\//
+    processed_file_info_a.push([filename, mtime_utc, filesize.to_i, checksum]) if filename =~ /^processed\//
+
+  end
+
+  idf_file_info_h.store(mtbks_dir, idf_file_info_a)
+  sdrf_file_info_h.store(mtbks_dir, sdrf_file_info_a)
+  maf_file_info_h.store(mtbks_dir, maf_file_info_a)
+  raw_file_info_h.store(mtbks_dir, raw_file_info_a)
+  processed_file_info_h.store(mtbks_dir, processed_file_info_a)
+
+end
+
+
+## filelist 作成
+pp new_file_a = new_file_a.sort.uniq
+for study_dir in public_study_a
+
+  mtbks_dir = ""
+  if study_dir =~ /\/(MTBKS\d{1,})/
+    mtbks_dir = $1
+  end
+
+  # 新しい file が一つでもあれば
+  if new_file_a.include?(mtbks_dir)
+
+    # study directory 直下に filelist を生成
+    filelist_f = open("#{study_dir}/#{mtbks_dir}.filelist.txt", "w")
+
+    filelist_f.puts ["Type", "Name", "Time", "Size", "MD5"].join("\t")
+
+    idf_a = idf_file_info_h[mtbks_dir]
+    sdrf_a = sdrf_file_info_h[mtbks_dir]
+    maf_a = maf_file_info_h[mtbks_dir]
+    raw_a = raw_file_info_h[mtbks_dir]
+    processed_a = processed_file_info_h[mtbks_dir]
+
+    # metadata 必須
+    if idf_a && sdrf_a
+
+      filelist_f.puts "IDF\t#{idf_a.join("\t")}"
+      filelist_f.puts "SDRF\t#{sdrf_a.join("\t")}"
+
+      for maf in maf_a.sort
+        filelist_f.puts "MAF\t#{maf.join("\t")}"
+      end
+
+      for raw in raw_a.sort
+        filelist_f.puts "raw\t#{raw.join("\t")}"
+      end
+
+      for processed in processed_a.sort
+        filelist_f.puts "processed\t#{processed.join("\t")}"
+      end
+
+    end
+
+    # ログ記録
+    filelist_log_file.puts "#{study_dir}/#{mtbks_dir}.filelist.txt List generated."
+
+  else
+
+    # ログ記録
+    filelist_log_file.puts "#{study_dir}/#{mtbks_dir}.filelist.txt Files are not changed."
+
+  end # if new_file_a.include?(mtbks_dir)
+
+  filelist_f.close
+
+end
+
+filelist_log_file.close

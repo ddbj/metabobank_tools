@@ -1,15 +1,13 @@
-#! /usr/bin/ruby
+#! /usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-require 'rubygems'
 require 'pp'
 require 'csv'
 require 'fileutils'
 require 'optparse'
 require 'json'
 require 'time'
-require './lib/mb-method.rb'
-#require '/usr/local/bin/lib/mb-method.rb'
+require 'metabobank_tools'
 
 #
 # 生命情報・DDBJ センター
@@ -20,8 +18,7 @@ require './lib/mb-method.rb'
 ###
 ### 設定
 ###
-conf_path = "conf"
-#conf_path = "/usr/local/bin/conf"
+conf_path = MetabobankTools.conf_path
 
 ###
 ### 入力
@@ -30,28 +27,22 @@ conf_path = "conf"
 ## Options
 idf_path = ""
 jira_issue = ""
+
 OptionParser.new{|opt|
+  opt.on('-i PATH', 'IDF file path (MTBKS1.idf.txt)') {|v|
+    idf_path = v
+  }
 
-	opt.on('-i [IDF file]', 'IDF file path'){|v|
-		raise "usage: -i IDF file (MTBKS1.idf.txt)" if v.nil?
-		idf_path = v		
-	}
+  opt.on('-j JIRA_ISSUE_ID', 'Jira issue ID (e.g., MBS-7)', /MBS-\d{1,}/) {|v|
+    jira_issue = v
+  }
 
-	opt.on('-j [Jira issue ID]', 'Jira issue ID (e.g., MBS-7)'){|v|
-		raise "usage: -j Jira issue ID (MBS-7)" if v !~ /MBS-\d{1,}/
-		jira_issue = v
-	}
-
-	begin
-
-		opt.parse!
-
-	rescue
-
-		puts "Invalid option. #{opt}"
-
-	end
-
+  begin
+    opt.parse!
+  rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
+    warn e.to_s
+    exit 1
+  end
 }
 
 ## 設定出力
@@ -70,7 +61,7 @@ mtbks_idf, idf_h, idf_a, idf_group_h, raw_idf_a, warning_idf_parse = idf_parse(i
 
 hold = "Hold (not viewable until the release of linked data)"
 if idf_h["Public Release Date"] && idf_h["Public Release Date"][0] && idf_h["Public Release Date"][0] != ""
-	hold = "Release immediately following data processing"
+  hold = "Release immediately following data processing"
 end
 
 ###
@@ -86,15 +77,15 @@ study_title = ""
 study_title = idf_h["Study Title"][0] if idf_h["Study Title"] && idf_h["Study Title"][0]
 for person_h in idf_group_h["Person"]
 
-	dear_a.push("#{person_h["Person First Name"]} #{person_h["Person Last Name"]}")
-	mail_a.push("#{person_h["Person Email"]}")
-	
-	# 最初の組織名を使用
-	if first
-		affiliation = person_h["Person Affiliation"]
-		first = false
-	end
-	
+  dear_a.push("#{person_h["Person First Name"]} #{person_h["Person Last Name"]}")
+  mail_a.push("#{person_h["Person Email"]}")
+
+  # 最初の組織名を使用
+  if first
+    affiliation = person_h["Person Affiliation"]
+    first = false
+  end
+
 end
 
 # メールの宛名
@@ -108,9 +99,9 @@ to = mail_a.join(",")
 cc = "metabobank@ddbj.nig.ac.jp"
 
 if jira_issue == ""
-	subject = "[MetaboBank] MetaboBank Assigned Accession No."
+  subject = "[MetaboBank] MetaboBank Assigned Accession No."
 else
-	subject = "[MetaboBank:#{jira_issue}] MetaboBank Assigned Accession No."
+  subject = "[MetaboBank:#{jira_issue}] MetaboBank Assigned Accession No."
 end
 
 body = ""
