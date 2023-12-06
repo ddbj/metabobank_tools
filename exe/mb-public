@@ -58,9 +58,8 @@ rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
   exit 1
 end
 
-if idf_path.nil? || release_type.nil? || initial_release_date.nil?
-  warn 'required option: -i, -r, -d'
-  exit 1
+if idf_path.nil? || release_type.nil?
+  warn 'required option: -i, -r'
 end
 
 ## ファイル名と SDRF filepath

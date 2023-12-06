@@ -100,7 +100,7 @@ end
 
 
 ## filelist 作成
-pp new_file_a = new_file_a.sort.uniq
+new_file_a = new_file_a.sort.uniq
 for study_dir in public_study_a
 
   mtbks_dir = ""
