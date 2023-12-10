@@ -548,7 +548,7 @@ for field_name, field_value_a in idf_h
     ### MB_IR0024 error Invalid characters
     unless field_value.ascii_only?
 
-      if field_name == "Study Description" || field_name == "Protocol Description"
+      if field_name == "Study Description" || field_name == "Protocol Description" || field_name == "Protocol Hardware"
 
         replaced_char = ""
         invalid_char = false
