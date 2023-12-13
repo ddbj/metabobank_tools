@@ -33,7 +33,7 @@ OptionParser.new{|opt|
     idf_path = v
   }
 
-  opt.on('-j JIRA_ISSUE_ID', 'Jira issue ID (e.g., MBS-7)', /MBS-\d{1,}/) {|v|
+  opt.on('-j JIRA_ISSUE_ID', 'Jira issue ID (e.g., MBS-7)', /^MBS-\d{1,}_?\d{1,}?$/) {|v|
     jira_issue = v
   }
 
