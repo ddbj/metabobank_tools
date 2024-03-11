@@ -1041,7 +1041,6 @@ sdrf_protocol_ref_index_a.each{|i|
   protocol_type_in_ref_a.push(protocol_types_in_ref_a.sort.uniq[0])
 
   ### MB_SR0033 error ignore Missing protocol reference
-
   if protocol_types_in_ref_a.sort.uniq.size == 0
     error_ignore_sdrf_a.push(["MB_SR0033", "error_ignore", "Protocol name is not referenced in Protocol REF: #{sdrf_file} Protocol REF at column #{i}"])
   end
@@ -1052,7 +1051,6 @@ protocol_type_ref_from_columns_a = protocol_type_in_ref_a.select{|e| protocol_ty
 if protocol_type_ref_from_columns_a.size > 0
   warning_sdrf_a.push(["MB_SR0035", "warning", "Protocol type reference from different columns: #{sdrf_file} #{protocol_type_ref_from_columns_a.sort.uniq.join(",")}"])
 end
-
 
 # Protocol REF で指定されている name から全て type が回収できれば
 sdrf_header_frame_a = []
@@ -1094,6 +1092,32 @@ if sdrf_protocol_ref_index_a.size == protocol_type_in_ref_a.size
 
   end
 
+end
+
+## SDRF CV チェック
+## MB_SR0045 error Invalid value for controlled terms
+# 未だルールなし
+
+## MB_SR0046 warning Invalid value for controlled terms
+sdrf_not_cv_warning_h = {}
+open("#{conf_path}/controlled_terms.json"){|f|
+	sdrf_not_cv_warning_h = JSON.load(f)["sdrf"]["warning"]
+}
+
+sdrf_field_not_cv_warning_h = {}
+for field, cv_term_a in sdrf_not_cv_warning_h
+  if sdrf_transpose_h[field]    
+		# 必須チェックは別で実施しているのでここでは空要素を除く
+		if (sdrf_transpose_h[field] - cv_term_a).reject(&:empty?).size > 0
+			sdrf_field_not_cv_warning_h.store(field, (sdrf_transpose_h[field] - cv_term_a).reject(&:empty?).join(","))
+		end
+  end
+end
+
+if sdrf_field_not_cv_warning_h.size > 0
+  for key, value in sdrf_field_not_cv_warning_h
+    warning_sdrf_a.push(["MB_SR0046", "warning", "Value is not in controlled terms: #{sdrf_file} #{key}:#{value}"])
+  end
 end
 
 ## SDRF order チェック

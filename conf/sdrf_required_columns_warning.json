@@ -1,8 +1,8 @@
 [
-	"Comment\\[BioSample\\]",
-	"Comment\\[sample_title\\]",
+	"Comment[BioSample]",
+	"Comment[sample_title]",
 	"Raw Data File",
 	"Processed Data File",
 	"Metabolite Assignment File",
-	"Factor Value\\[[-_ A-Za-z0-9.]+\\]"
+	"Factor Value[[-_ A-Za-z0-9.]+]"
 ]

@@ -13,5 +13,8 @@
     }
   },
   "sdrf": {
-  }
+    "warning": {
+      "Parameter Value[Scan polarity]": ["positive", "negative", "alternating"]
+    }
+	}
 }
