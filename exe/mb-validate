@@ -1551,7 +1551,7 @@ for protocol_type, protocol_type_parameter_a in protocol_type_parameter_h
     for protocol_h in idf_group_h["Protocol"]
 
       if protocol_h["Protocol Type"] == protocol_type
-        unless protocol_h["Protocol Parameters"].split(";") == protocol_type_parameter_a
+        unless protocol_h["Protocol Parameters"].to_s.split(";") == protocol_type_parameter_a
           protocol_type_unmatch_parameter_h.store(protocol_type, (protocol_h["Protocol Parameters"].split(";") - protocol_type_parameter_a | protocol_type_parameter_a - protocol_h["Protocol Parameters"].split(";")))
         end
       end
