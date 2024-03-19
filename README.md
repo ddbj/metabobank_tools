@@ -1,6 +1,6 @@
 # Metabobank tools
 
-## excel2tsv.rb
+## mbexcel2idfsdrf.rb
 
 MetaboBank metadata excel から IDF/SDRF tsv ファイルを生成  
 
@@ -9,7 +9,7 @@ Options
 * -f: base filename
 
 ```
-ruby excel2tsv.rb -i MBS-22_1_LC-MS_metadata.xlsx -f test
+ruby mbexcel2idfsdrf.rb -i MBS-22_1_LC-MS_metadata.xlsx -f test
 
 test.idf.txt
 test.sdrf.txt
