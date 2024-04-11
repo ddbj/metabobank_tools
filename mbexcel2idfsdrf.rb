@@ -14,6 +14,7 @@ require 'optparse'
 
 # 変更履歴
 # 2024-03-19 metadata excel から tsv ファイルを生成
+# 2024-04-11 デフォルトはエクセルファイル名をベース名に使用
 
 ### Options
 inputs = ""
@@ -28,8 +29,7 @@ OptionParser.new{|opt|
 
 	opt.on('-f [filename]', 'base filename for tsv'){|v|
 		raise "usage: -f base filename for tsv" if v.nil?
-		filename = v
-		puts "Base filename: #{v}\n\n"
+		filename = v		
 }
 
 	begin
@@ -39,6 +39,14 @@ OptionParser.new{|opt|
 	end
 
 }
+
+## Base filename
+# ファイル名指定ない場合はエクセルファイル名を使用
+if filename.empty? && !inputs.empty? && File.basename(inputs) && !File.basename(inputs).empty?
+	filename = File.basename(inputs).sub(/\.xlsx$/, "")	
+end
+
+puts "Base filename: #{filename}\n\n"
 
 ### Read excel file(s)
 
