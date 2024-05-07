@@ -188,9 +188,9 @@ case gets.chomp
       if field_name == "Person Email"
         # do nothing
       elsif idf_corrected_h[field_name]
-        idf_public_f.puts "#{field_name}\t#{idf_corrected_h[field_name].collect{|e| e.match(/\n|\t/) ? '"' + e + '"' : e }.join("\t")}"
+        idf_public_f.puts "#{field_name}\t#{idf_corrected_h[field_name].collect{|e| e && e.match(/\n|\t/) ? '"' + e + '"' : e }.join("\t")}"
       else
-        idf_public_f.puts "#{line_a.collect{|e| e.match(/\n|\t/) ? '"' + e + '"' : e }.join("\t")}"
+        idf_public_f.puts "#{line_a.collect{|e| e && e.match(/\n|\t/) ? '"' + e + '"' : e }.join("\t")}"
       end
 
     end
