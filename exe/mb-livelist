@@ -28,19 +28,16 @@ idf_a = Dir.glob("study/MTBKS*/*.idf.txt").sort_by{|v| v.sub(/study\/MTBKS\d{1,}
 sdrf_a = Dir.glob("study/MTBKS*/*.sdrf.txt").sort_by{|v| v.sub(/study\/MTBKS\d{1,}\/MTBKS/, "").sub(/\.sdrf\.txt/, "").to_i }
 
 # MTBKS 配下に idf、sdrf がない場合 log 出力
+# MTBKS 番号整数でソートするため番号部分以外を削除し、整数化してソート
 study_dir_a = Dir.glob("study/MTBKS*").collect{|v| v.sub(/study\//, "") }
-idf_dir_a = Dir.glob("study/MTBKS*/*.idf.txt").select{|v| v =~ /MTBKS\d{1,}\.idf\.txt/}.sort
+idf_dir_a = Dir.glob("study/MTBKS*/*.idf.txt").select{|v| v =~ /MTBKS\d{1,}\.idf\.txt/}.sort_by{|v| v.sub(/study\/MTBKS\d{1,}\/MTBKS/, "").sub(/\.idf\.txt/, "").to_i }
 idf_study_dir_a = idf_dir_a.collect{|v| v.sub(/\/MTBKS\d{1,}(\.\d)?\.idf\.txt/, "").sub(/study\//, "") }
 
 # IDF
 study_without_idf_a = study_dir_a - idf_study_dir_a
 
-idf_dir_a = Dir.glob("study/MTBKS*/*.idf.txt").select{|v| v =~ /MTBKS\d{1,}\.idf\.txt/}.sort
-idf_study_dir_a = idf_a.collect{|v| v.sub(/\/MTBKS\d{1,}(\.\d)?\.idf\.txt/, "").sub(/study\//, "") }
-study_without_idf_a = study_dir_a - idf_study_dir_a
-
 # SDRF
-sdrf_dir_a = Dir.glob("study/MTBKS*/*.sdrf.txt").select{|v| v =~ /MTBKS\d{1,}\.sdrf\.txt/}.sort
+sdrf_dir_a = Dir.glob("study/MTBKS*/*.sdrf.txt").select{|v| v =~ /MTBKS\d{1,}\.sdrf\.txt/}.sort_by{|v| v.sub(/study\/MTBKS\d{1,}\/MTBKS/, "").sub(/\.sdrf\.txt/, "").to_i }
 sdrf_study_dir_a = sdrf_a.collect{|v| v.sub(/\/MTBKS\d{1,}(\.\d)?\.sdrf\.txt/, "").sub(/study\//, "") }
 study_without_sdrf_a = study_dir_a - sdrf_study_dir_a
 
