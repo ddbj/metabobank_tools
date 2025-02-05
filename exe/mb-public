@@ -26,9 +26,9 @@ conf_path = MetabobankTools.conf_path
 ###
 
 ## Options
-idf_path = nil
-release_type = nil
-initial_release_date = nil
+idf_path = ""
+release_type = ""
+initial_release_date = ""
 last_update_date = Date.today.strftime("%Y-%m-%d")
 
 opt = OptionParser.new {|opt|
@@ -58,8 +58,12 @@ rescue OptionParser::MissingArgument, OptionParser::InvalidArgument => e
   exit 1
 end
 
-if idf_path.nil? || release_type.nil?
-  warn 'required option: -i, -r'
+if idf_path.empty?
+  warn 'required option: -i'
+end
+
+if release_type.empty?
+  warn 'required option: -r'
 end
 
 ## ファイル名と SDRF filepath
