@@ -237,9 +237,9 @@ case gets.chomp
       puts "mv -f #{idf_dir}/#{mtbks_idf}.public.sdrf.txt #{public_file_path}/#{mtbks_idf}/#{mtbks_idf}.sdrf.txt"
       `mv -f #{idf_dir}/#{mtbks_idf}.public.sdrf.txt #{public_file_path}/#{mtbks_idf}/#{mtbks_idf}.sdrf.txt`
 
-      if Dir.glob("#{idf_dir}/#{mtbks_idf}*.maf.txt").size > 0
-        puts "cp #{idf_dir}/#{mtbks_idf}.*.maf.txt #{public_file_path}/#{mtbks_idf}"
-        `cp #{idf_dir}/#{mtbks_idf}.*.maf.txt #{public_file_path}/#{mtbks_idf}`
+      if Dir.glob("#{idf_dir}/#{mtbks_idf}.*.maf.*.txt").size > 0
+        puts "cp #{idf_dir}/#{mtbks_idf}.*.maf.*.txt #{public_file_path}/#{mtbks_idf}"
+        `cp #{idf_dir}/#{mtbks_idf}.*.maf.*.txt #{public_file_path}/#{mtbks_idf}`
       end
 
       if Dir.exist?("#{idf_dir}/raw")
