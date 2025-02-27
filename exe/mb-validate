@@ -719,14 +719,14 @@ for sdrf_required_columns_warning in sdrf_required_columns_warning_a
   all_missing = false
   sdrf_header_a.each{|sdrf_header|
     if sdrf_header =~ /#{sdrf_required_columns_warning}/
-
+			
       exist = true
 
       # 値が全部空もしくは null value
       if (sdrf_transpose_h[sdrf_header] - null_values_a.push("")).size == 0
         all_null_sdrf_required_columns_warning_a.push(sdrf_header)
       end
-
+			
     end
   }
 
@@ -1121,7 +1121,7 @@ if sdrf_field_not_cv_warning_h.size > 0
 end
 
 ## SDRF order チェック
-## MB_SR0026 error ignore Invalid column order 全 Comment を削除した順序骨格の比較
+## MB_SR0026 error ignore Invalid column order 全 Comment Unit を削除した順序骨格の比較
 if sdrf_column_order_h[submission_type] && sdrf_header_frame_a.uniq != sdrf_column_order_h[submission_type].reject{|e| e =~ /Comment\[.*\]/ || e =~ /Unit\[.*\]/}
   error_ignore_sdrf_a.push(["MB_SR0026", "error_ignore", "SDRF column order is invalid: #{sdrf_file}"])
 end
